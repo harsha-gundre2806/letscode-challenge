@@ -185,3 +185,5 @@ letscode-challenge/
 - [x] **Mandatory Features (100% Implemented)**: Live AQI Dashboard, Interactive Map, Historical Tracker, Location Comparison, Health Dashboard, Forecast.
 - [x] **Bonus & Innovation Features (100% Implemented)**: Commute Exposure Life-Log, Aero Safe Window Engine, What-If Simulator, Vulnerable Group Guard, Emergency Plan PDF Generator, Audit Drawer, Audio Briefing, BreatheAI, Anomaly Detection, Leaderboard.
 - [x] **Style & Design Constraints**: Zero shadows (`box-shadow: none`), Zero emojis (pure Lucide SVGs), pleasant colors, 200ms transitions, guided next-step UX.
+#   l e t s c o d e - c h a l l e n g e  
+ 
