@@ -307,10 +307,6 @@ export const App = () => {
           <div className="flex items-center gap-4 text-[11px]">
             <span>Copernicus CAMS & Open-Meteo Public API</span>
             <span>•</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-              Zero Shadows & Emojis Compliant
-            </span>
-            <span>•</span>
             <button
               onClick={() => setIsAuditOpen(true)}
               className="hover:underline text-slate-700 dark:text-slate-300 cursor-pointer"
