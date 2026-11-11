@@ -23,6 +23,7 @@ export interface LocationInfo {
   longitude: number;
   admin1?: string;
   timezone?: string;
+  isAutoDetected?: boolean;
 }
 
 export interface CurrentPollutants {
@@ -37,6 +38,12 @@ export interface CurrentPollutants {
   ozone: number;            // µg/m³
   dust?: number;            // µg/m³
   uv_index?: number;
+  // Authentic meteorological data
+  temperature?: number;      // °C
+  humidity?: number;         // %
+  wind_speed?: number;       // km/h
+  wind_direction?: number;   // degrees
+  weather_condition?: string;
 }
 
 export interface HourlyDataPoint {

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AirQualityResponse, MicroProfile } from '../../types/airQuality';
-import { getAQICategory, getProfileHealthWarning } from '../../utils/aqiUtils';
+import { getAQICategory } from '../../utils/aqiUtils';
+import { askGeminiOrFallback, getEffectiveGeminiApiKey } from '../../services/aiService';
 import { 
   Bot, 
   Send, 
@@ -8,10 +9,8 @@ import {
   Volume2, 
   Square, 
   User, 
-  HelpCircle,
-  Wind,
-  CheckCircle2,
-  AlertTriangle
+  Key,
+  ShieldCheck
 } from 'lucide-react';
 
 interface AiAssistantTabProps {
@@ -30,7 +29,6 @@ interface ChatMessage {
 export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({
   airData,
   microProfile,
-  onNavigateToTab,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState('');
@@ -40,7 +38,7 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({
 
   const aqi = airData.current.us_aqi;
   const category = getAQICategory(aqi, microProfile);
-  const healthWarning = getProfileHealthWarning(microProfile, aqi);
+  const hasGeminiKey = Boolean(getEffectiveGeminiApiKey());
 
   // Initialize with intelligent context greeting
   useEffect(() => {
@@ -51,20 +49,22 @@ export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({
           sender: 'ai',
           text: `Hello! I am BreatheAI, your environmental health & atmospheric intelligence assistant. 
 
-I am currently analyzing live atmospheric data for **${airData.location.name}** (AQI: **${aqi}**, ${category.label}) tailored to your active profile of **${microProfile}**. 
+I am actively analyzing verified atmospheric data for **${airData.location.name}** (AQI: **${aqi}**, ${category.label}) calibrated to your profile of **${microProfile}**.
+
+${hasGeminiKey ? 'Gemini 1.5 Cloud LLM engine is active.' : 'Operating on BreatheAI built-in atmospheric clinical intelligence engine.'}
 
 How can I help you navigate today's air conditions? You can ask about outdoor exercise safety, masking protocols, symptom management, or atmospheric trends.`,
           timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
         },
       ]);
     }
-  }, [airData.location.name, aqi, microProfile]);
+  }, [airData.location.name, aqi, microProfile, hasGeminiKey]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = async (textToSend?: string) => {
     const text = textToSend || inputMessage;
     if (!text.trim()) return;
 
@@ -79,9 +79,8 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
     setInputMessage('');
     setIsTyping(true);
 
-    // Context-aware AI Intelligence Engine
-    setTimeout(() => {
-      const responseText = generateSmartResponse(text, airData, microProfile);
+    try {
+      const responseText = await askGeminiOrFallback(text, airData, microProfile);
       const aiMsg: ChatMessage = {
         id: `ai-${Date.now()}`,
         sender: 'ai',
@@ -89,8 +88,11 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
         timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
       };
       setMessages(prev => [...prev, aiMsg]);
+    } catch (err) {
+      console.error('Error generating AI response:', err);
+    } finally {
       setIsTyping(false);
-    }, 600);
+    }
   };
 
   const handleSpeak = (msgId: string, text: string) => {
@@ -140,7 +142,9 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
 
         <div className="flex items-center gap-2 text-xs">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-semibold text-slate-700 dark:text-slate-300">Live Agent Active</span>
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
+            {hasGeminiKey ? 'Gemini 1.5 Active' : 'Domain Engine Active'}
+          </span>
         </div>
       </div>
 
@@ -176,7 +180,7 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
                   {msg.sender === 'ai' && (
                     <button
                       onClick={() => handleSpeak(msg.id, msg.text)}
-                      className="inline-flex items-center gap-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                      className="inline-flex items-center gap-1 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
                       title="Read aloud"
                     >
                       {speakingId === msg.id ? (
@@ -206,7 +210,7 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]" />
-                <span className="ml-1 text-[11px]">BreatheAI is analyzing atmospheric data...</span>
+                <span className="ml-1 text-[11px]">BreatheAI is analyzing atmospheric conditions...</span>
               </div>
             </div>
           )}
@@ -260,74 +264,3 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
     </div>
   );
 };
-
-// Intelligent Domain Response Engine
-function generateSmartResponse(
-  query: string, 
-  data: AirQualityResponse, 
-  profile: MicroProfile
-): string {
-  const q = query.toLowerCase();
-  const aqi = data.current.us_aqi;
-  const pm25 = data.current.pm2_5;
-  const location = data.location.name;
-  const category = getAQICategory(aqi, profile);
-
-  if (q.includes('jog') || q.includes('run') || q.includes('exercise') || q.includes('walk') || q.includes('workout')) {
-    if (aqi > 150) {
-      return `Based on live measurements in **${location}** (AQI: **${aqi}**, PM2.5: **${pm25} µg/m³**), outdoor endurance exercise is **strongly discouraged**. 
-
-During cardiovascular exertion, your minute ventilation rate jumps from ~8 L/min to over 35 L/min. Because you breathe through your mouth rather than your nose, natural nasal filtration is bypassed, allowing toxic ultrafine soot to penetrate directly into your terminal bronchioles. 
-
-**Recommendation:** Shift all workouts indoors using a room with an operating HEPA purifier. Check our 7-Day Forecast tab for safe exercise windows.`;
-    } else if (aqi > 100) {
-      return `Air quality in **${location}** is currently **Moderate to Sensitive** (AQI: **${aqi}**). 
-
-For a healthy individual, a brisk 20-minute walk is acceptable. However, for your active profile of **${profile}**, prolonged high-intensity interval training or marathon runs should be curtailed. Aim for low-exertion mobility work indoors.`;
-    } else {
-      return `Good news! Current air quality in **${location}** (AQI: **${aqi}**, PM2.5: **${pm25} µg/m³**) is well within safe thresholds. It is an optimal time for outdoor running, cycling, or team sports.`;
-    }
-  }
-
-  if (q.includes('mask') || q.includes('n95') || q.includes('cloth') || q.includes('wear')) {
-    return `At current particulate levels in **${location}** (PM2.5: **${pm25} µg/m³**):
-
-1. **N95 / FFP2 Respirator**: ${pm25 > 35 ? '**Mandatory if stepping outdoors**. Standard cloth masks have pore sizes exceeding 100 microns, whereas PM2.5 particles are under 2.5 microns and pass straight through.' : 'Recommended if you have respiratory sensitivity, otherwise optional.'}
-2. **Fit Check**: Ensure the metal nose clip is molded tightly to the bridge of your nose. Any air leakage around the edges reduces mask efficiency by up to 60%.
-3. **Exhalation Valves**: Avoid masks with unfiltered exhalation valves if in crowded indoor transit.`;
-  }
-
-  if (q.includes('child') || q.includes('kid') || q.includes('school') || q.includes('play')) {
-    if (aqi > 100) {
-      return `Pediatric caution advised in **${location}**. Children breathe 50% more air per pound of body weight than adults, and their airway branches are narrower. 
-
-At AQI **${aqi}**, outdoor physical education and playground sports should be relocated to filtered indoor gymnasiums. Keep school windows closed during peak morning traffic hours.`;
-    }
-    return `Current air quality in **${location}** (AQI: **${aqi}**) is safe for children's outdoor playground activities and school sports.`;
-  }
-
-  if (q.includes('why') || q.includes('cause') || q.includes('spike') || q.includes('high')) {
-    return `In **${location}**, today's PM2.5 concentration of **${pm25} µg/m³** is primarily driven by:
-
-1. **Diurnal Combustion Cycles**: Vehicular rush hour exhaust (NO2: ${data.current.nitrogen_dioxide} µg/m³) and industrial activity.
-2. **Atmospheric Planetary Boundary Layer**: When ground temperatures drop at night and morning, a nocturnal thermal inversion traps particulate plumes close to the surface until solar heating restores convective mixing.
-3. **Regional Aerosol Transport**: Secondary particulate formation from ambient ammonia, sulfur dioxide (${data.current.sulphur_dioxide} µg/m³), and nitrogen dioxide reacting in sunlight.`;
-  }
-
-  if (q.includes('purifier') || q.includes('hepa') || q.includes('room') || q.includes('indoor')) {
-    return `For indoor air management in **${location}**:
-
-1. **HEPA Grade**: Look for a certified **True HEPA H13 or H14** filter capable of capturing 99.97% of 0.3-micron aerosols.
-2. **CADR Sizing**: Your purifier's CADR rating (m³/hour) should be at least **4 times the cubic volume** of your bedroom. 
-3. **Sealing Protocol**: Keep exterior doors and windows shut. Purifiers cannot lower room PM2.5 if windows remain cracked open.
-4. **Activated Carbon**: Ensure the unit includes an activated carbon bed to adsorb gaseous NO2 and volatile organic compounds.`;
-  }
-
-  return `Regarding your query about **${location}**:
-The current Air Quality Index is **${aqi}** (${category.label}) with PM2.5 measured at **${pm25} µg/m³**.
-
-For a **${profile}** profile, clinical recommendations suggest:
-${category.generalHealthAdvisory}
-
-You can also explore the **Exposure Life-Log** tab to calculate inhaled commute dosages or the **What-If Simulator** to test policy mitigation scenarios.`;
-}

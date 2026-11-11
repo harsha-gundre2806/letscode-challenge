@@ -6,10 +6,12 @@ import {
 } from '../types/airQuality';
 
 export const CURATED_CITIES: LocationInfo[] = [
+  { name: 'Hyderabad', country: 'India', latitude: 17.3850, longitude: 78.4867, admin1: 'Telangana', timezone: 'Asia/Kolkata' },
   { name: 'New Delhi', country: 'India', latitude: 28.6139, longitude: 77.2090, admin1: 'Delhi', timezone: 'Asia/Kolkata' },
   { name: 'Mumbai', country: 'India', latitude: 19.0760, longitude: 72.8777, admin1: 'Maharashtra', timezone: 'Asia/Kolkata' },
   { name: 'Bengaluru', country: 'India', latitude: 12.9716, longitude: 77.5946, admin1: 'Karnataka', timezone: 'Asia/Kolkata' },
   { name: 'Kolkata', country: 'India', latitude: 22.5726, longitude: 88.3639, admin1: 'West Bengal', timezone: 'Asia/Kolkata' },
+  { name: 'Chennai', country: 'India', latitude: 13.0827, longitude: 80.2707, admin1: 'Tamil Nadu', timezone: 'Asia/Kolkata' },
   { name: 'New York', country: 'United States', latitude: 40.7128, longitude: -74.0060, admin1: 'New York', timezone: 'America/New_York' },
   { name: 'London', country: 'United Kingdom', latitude: 51.5074, longitude: -0.1278, admin1: 'England', timezone: 'Europe/London' },
   { name: 'Tokyo', country: 'Japan', latitude: 35.6762, longitude: 139.6503, admin1: 'Tokyo', timezone: 'Asia/Tokyo' },
@@ -19,6 +21,72 @@ export const CURATED_CITIES: LocationInfo[] = [
   { name: 'Dubai', country: 'United Arab Emirates', latitude: 25.2048, longitude: 55.2708, admin1: 'Dubai', timezone: 'Asia/Dubai' },
   { name: 'Reykjavik', country: 'Iceland', latitude: 64.1466, longitude: -21.9426, admin1: 'Capital Region', timezone: 'Atlantic/Reykjavik' },
 ];
+
+// Interpret WMO weather codes
+function interpretWeatherCode(code: number): string {
+  if (code === 0) return 'Clear Sky';
+  if (code === 1 || code === 2) return 'Mainly Clear / Partly Cloudy';
+  if (code === 3) return 'Overcast';
+  if (code === 45 || code === 48) return 'Fog & Atmospheric Haze';
+  if (code >= 51 && code <= 55) return 'Light Drizzle';
+  if (code >= 61 && code <= 65) return 'Rain Showers';
+  if (code >= 71 && code <= 77) return 'Snow';
+  if (code >= 80 && code <= 82) return 'Heavy Showers';
+  if (code >= 95) return 'Thunderstorm';
+  return 'Atmospheric Haze';
+}
+
+// Automatic Location Detection: GPS first, then secure HTTPS IP Geolocation
+export async function detectAutoLocation(): Promise<LocationInfo> {
+  // 1. Try browser high-accuracy GPS with a 4s timeout
+  if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 4000,
+          maximumAge: 60000,
+        });
+      });
+
+      const { latitude, longitude } = position.coords;
+      const reverse = await reverseGeocode(latitude, longitude);
+      return {
+        ...reverse,
+        isAutoDetected: true,
+      };
+    } catch (gpsError) {
+      console.info('Browser GPS unavailable or timed out; querying secure IP geolocation...', gpsError);
+    }
+  }
+
+  // 2. HTTPS IP Geolocation Fallback
+  try {
+    const res = await fetch('https://get.geojs.io/v1/ip/geo.json');
+    if (res.ok) {
+      const geo = await res.json();
+      if (geo.latitude && geo.longitude) {
+        return {
+          name: geo.city || geo.region || 'Current Location',
+          country: geo.country || 'Detected Region',
+          latitude: parseFloat(geo.latitude),
+          longitude: parseFloat(geo.longitude),
+          admin1: geo.region,
+          timezone: geo.timezone,
+          isAutoDetected: true,
+        };
+      }
+    }
+  } catch (ipError) {
+    console.warn('IP Geolocation fallback failed:', ipError);
+  }
+
+  // 3. Graceful fallback
+  return {
+    ...CURATED_CITIES[0],
+    isAutoDetected: false,
+  };
+}
 
 export async function searchLocations(query: string): Promise<LocationInfo[]> {
   if (!query || query.trim().length < 2) return [];
@@ -36,6 +104,7 @@ export async function searchLocations(query: string): Promise<LocationInfo[]> {
       longitude: item.longitude,
       admin1: item.admin1,
       timezone: item.timezone,
+      isAutoDetected: false,
     }));
   } catch (err) {
     console.error('Error searching locations:', err);
@@ -53,11 +122,13 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
       const data = await res.json();
       const name = data.address?.city || data.address?.town || data.address?.suburb || data.address?.county || 'Current Coordinates';
       const country = data.address?.country || 'Detected Region';
+      const admin1 = data.address?.state || data.address?.region;
       return {
         name,
         country,
         latitude: lat,
         longitude: lon,
+        admin1,
       };
     }
   } catch (e) {
@@ -65,7 +136,7 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
   }
 
   return {
-    name: `Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}`,
+    name: `Coordinates (${lat.toFixed(2)}, ${lon.toFixed(2)})`,
     country: 'Custom Location',
     latitude: lat,
     longitude: lon,
@@ -74,21 +145,53 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
 
 export async function fetchAirQualityData(location: LocationInfo): Promise<AirQualityResponse> {
   const startTime = performance.now();
-  const endpoint = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi,european_aqi&past_days=7&forecast_days=7&timezone=auto`;
+  const airQualityEndpoint = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi,european_aqi&past_days=7&forecast_days=7&timezone=auto`;
+  const weatherEndpoint = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto`;
 
-  const res = await fetch(endpoint);
+  // Fetch both Air Quality and Meteorological data in parallel
+  const [aqRes, weatherRes] = await Promise.all([
+    fetch(airQualityEndpoint),
+    fetch(weatherEndpoint).catch(() => null),
+  ]);
+
   const latencyMs = Math.round(performance.now() - startTime);
 
-  if (!res.ok) {
-    throw new Error(`Air Quality API error: HTTP ${res.status}`);
+  if (!aqRes.ok) {
+    throw new Error(`Air Quality API error: HTTP ${aqRes.status}`);
   }
 
-  const json = await res.json();
+  const json = await aqRes.json();
   const currentRaw = json.current;
   const hourlyRaw = json.hourly;
 
   if (!currentRaw || !hourlyRaw) {
     throw new Error('Incomplete data received from atmospheric monitoring network');
+  }
+
+  // Parse weather details
+  let weatherData: {
+    temperature?: number;
+    humidity?: number;
+    wind_speed?: number;
+    wind_direction?: number;
+    weather_condition?: string;
+  } = {};
+
+  if (weatherRes && weatherRes.ok) {
+    try {
+      const wJson = await weatherRes.json();
+      if (wJson.current) {
+        weatherData = {
+          temperature: wJson.current.temperature_2m,
+          humidity: wJson.current.relative_humidity_2m,
+          wind_speed: wJson.current.wind_speed_10m,
+          wind_direction: wJson.current.wind_direction_10m,
+          weather_condition: interpretWeatherCode(wJson.current.weather_code),
+        };
+      }
+    } catch (e) {
+      console.warn('Weather parse fallback:', e);
+    }
   }
 
   // Parse hourly data points
@@ -114,7 +217,6 @@ export async function fetchAirQualityData(location: LocationInfo): Promise<AirQu
     }
   }
 
-  // Split into verified history (past) and forecast model (future)
   const history = allHourly.filter(p => !p.isForecast);
   const forecast = allHourly.filter(p => p.isForecast);
 
@@ -132,6 +234,7 @@ export async function fetchAirQualityData(location: LocationInfo): Promise<AirQu
       ozone: currentRaw.ozone ?? 0,
       dust: currentRaw.dust ?? 0,
       uv_index: currentRaw.uv_index ?? 0,
+      ...weatherData,
     },
     hourly: allHourly,
     history,
@@ -140,19 +243,18 @@ export async function fetchAirQualityData(location: LocationInfo): Promise<AirQu
     dataSource: {
       name: 'Open-Meteo Air Quality Platform',
       model: 'Copernicus Atmosphere Monitoring Service (CAMS) & NOAA GEFS-Aerosols',
-      endpoint,
+      endpoint: airQualityEndpoint,
       latencyMs,
       sensorType: 'Satellite Reanalysis + CAMS Ground Ensemble',
     },
   };
 }
 
-// Statistical Anomaly Detection in atmospheric records
 export function detectAnomalies(history: HourlyDataPoint[]): AnomalySpike[] {
   if (history.length < 12) return [];
 
   const anomalies: AnomalySpike[] = [];
-  const windowSize = 12; // 12-hour moving window
+  const windowSize = 12;
 
   for (let i = windowSize; i < history.length; i++) {
     const windowSlice = history.slice(i - windowSize, i);
@@ -184,6 +286,5 @@ export function detectAnomalies(history: HourlyDataPoint[]): AnomalySpike[] {
     }
   }
 
-  // Return most recent notable anomalies (capped to top 5)
   return anomalies.slice(-5).reverse();
 }

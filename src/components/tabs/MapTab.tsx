@@ -1,15 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { LocationInfo, AirQualityResponse } from '../../types/airQuality';
-import { CURATED_CITIES, reverseGeocode, fetchAirQualityData } from '../../services/airQualityService';
+import { LocationInfo } from '../../types/airQuality';
+import { reverseGeocode, fetchAirQualityData } from '../../services/airQualityService';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
-  MapPin, 
   Layers, 
-  AlertTriangle, 
-  ShieldCheck, 
   Check, 
-  ExternalLink,
   Flame,
   TreePine,
   RefreshCw
@@ -19,6 +15,7 @@ interface MapTabProps {
   currentLocation: LocationInfo;
   onSelectLocation: (loc: LocationInfo) => void;
   onNavigateToTab: (tab: any) => void;
+  darkMode?: boolean;
 }
 
 interface MapCityMarker {
@@ -29,8 +26,8 @@ interface MapCityMarker {
   isCleanPocket: boolean;
 }
 
-// Sample global benchmark stations with authentic approximate baselines
 const GLOBAL_BENCHMARK_STATIONS: MapCityMarker[] = [
+  { location: { name: 'Hyderabad', country: 'India', latitude: 17.3850, longitude: 78.4867 }, aqi: 128, pm25: 46, isHotspot: false, isCleanPocket: false },
   { location: { name: 'New Delhi', country: 'India', latitude: 28.6139, longitude: 77.2090 }, aqi: 245, pm25: 110, isHotspot: true, isCleanPocket: false },
   { location: { name: 'Lahore', country: 'Pakistan', latitude: 31.5204, longitude: 74.3587 }, aqi: 280, pm25: 145, isHotspot: true, isCleanPocket: false },
   { location: { name: 'Beijing', country: 'China', latitude: 39.9042, longitude: 116.4074 }, aqi: 155, pm25: 65, isHotspot: true, isCleanPocket: false },
@@ -51,9 +48,11 @@ export const MapTab: React.FC<MapTabProps> = ({
   currentLocation,
   onSelectLocation,
   onNavigateToTab,
+  darkMode = false,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
 
   const [activePollutantLayer, setActivePollutantLayer] = useState<'aqi' | 'pm25'>('aqi');
@@ -72,17 +71,22 @@ export const MapTab: React.FC<MapTabProps> = ({
         attributionControl: true,
       });
 
-      // Clean flat modern map tiles (CartoDB Positron / OSM clean)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      const tileUrl = darkMode
+        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+      const tileLayer = L.tileLayer(tileUrl, {
         attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
         maxZoom: 18,
       }).addTo(map);
+
+      tileLayerRef.current = tileLayer;
 
       const markersGroup = L.layerGroup().addTo(map);
       markersLayerRef.current = markersGroup;
       mapInstanceRef.current = map;
 
-      // Click anywhere to fetch coordinate air quality
+      // Click anywhere on Earth to query authentic air quality
       map.on('click', async (e: L.LeafletMouseEvent) => {
         const { lat, lng } = e.latlng;
         setIsFetchingCoord(true);
@@ -107,7 +111,6 @@ export const MapTab: React.FC<MapTabProps> = ({
     }
 
     return () => {
-      // Cleanup on unmount
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
@@ -115,7 +118,24 @@ export const MapTab: React.FC<MapTabProps> = ({
     };
   }, []);
 
-  // Update Markers when station or layer changes
+  // Update Tile Layer when Dark Mode changes
+  useEffect(() => {
+    if (!mapInstanceRef.current || !tileLayerRef.current) return;
+    mapInstanceRef.current.removeLayer(tileLayerRef.current);
+
+    const tileUrl = darkMode
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+    const newTileLayer = L.tileLayer(tileUrl, {
+      attribution: '&copy; CARTO &copy; OpenStreetMap',
+      maxZoom: 18,
+    }).addTo(mapInstanceRef.current);
+
+    tileLayerRef.current = newTileLayer;
+  }, [darkMode]);
+
+  // Update Markers
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
 
@@ -123,9 +143,7 @@ export const MapTab: React.FC<MapTabProps> = ({
 
     GLOBAL_BENCHMARK_STATIONS.forEach(station => {
       const cat = getAQICategory(station.aqi);
-      const isSelected = selectedStation?.location.name === station.location.name;
 
-      // Custom Clean Flat HTML Pin
       const html = `
         <div style="
           display: flex;
@@ -139,7 +157,7 @@ export const MapTab: React.FC<MapTabProps> = ({
           font-weight: 700;
           font-size: 11px;
           font-family: monospace;
-          border: 2px solid white;
+          border: 2px solid ${darkMode ? '#0F172A' : '#FFFFFF'};
           cursor: pointer;
         ">
           ${activePollutantLayer === 'aqi' ? station.aqi : Math.round(station.pm25)}
@@ -163,7 +181,7 @@ export const MapTab: React.FC<MapTabProps> = ({
 
       markersLayerRef.current?.addLayer(marker);
     });
-  }, [activePollutantLayer, selectedStation]);
+  }, [activePollutantLayer, selectedStation, darkMode]);
 
   const handleSelectAsActive = (station: MapCityMarker) => {
     onSelectLocation(station.location);
@@ -186,7 +204,7 @@ export const MapTab: React.FC<MapTabProps> = ({
               className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
                 activePollutantLayer === 'aqi'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               US AQI
@@ -196,7 +214,7 @@ export const MapTab: React.FC<MapTabProps> = ({
               className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
                 activePollutantLayer === 'pm25'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               PM2.5 (µg/m³)
@@ -223,11 +241,10 @@ export const MapTab: React.FC<MapTabProps> = ({
       {/* Main Map Container & Inspector Overlay */}
       <div className="relative w-full h-[580px] bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
         
-        {/* Leaflet Map Div */}
         <div ref={mapContainerRef} className="w-full h-full" />
 
         {/* Click Instruction Badge */}
-        <div className="absolute top-4 left-4 z-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xs border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 pointer-events-none">
+        <div className="absolute top-4 left-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 pointer-events-none">
           Click any coordinate on Earth to query authentic atmospheric data
         </div>
 
@@ -247,7 +264,7 @@ export const MapTab: React.FC<MapTabProps> = ({
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                   {selectedStation.location.name}
                 </h3>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 dark:text-slate-500">
                   {selectedStation.location.country}
                 </span>
               </div>

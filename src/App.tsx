@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { LocationInfo, MicroProfile, AirQualityResponse } from './types/airQuality';
-import { CURATED_CITIES, fetchAirQualityData } from './services/airQualityService';
+import { CURATED_CITIES, fetchAirQualityData, detectAutoLocation } from './services/airQualityService';
 import { Navbar } from './components/Navbar';
 import { NavigationTabs, TabId } from './components/NavigationTabs';
 import { NextStepGuide } from './components/NextStepGuide';
@@ -20,10 +20,10 @@ import { SimulatorTab } from './components/tabs/SimulatorTab';
 import { AiAssistantTab } from './components/tabs/AiAssistantTab';
 import { LeaderboardTab } from './components/tabs/LeaderboardTab';
 
-import { RefreshCw, AlertCircle, ShieldCheck, Wind } from 'lucide-react';
+import { RefreshCw, AlertCircle, Wind } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const [currentLocation, setCurrentLocation] = useState<LocationInfo>(CURATED_CITIES[0]); // Default to New Delhi
+  const [currentLocation, setCurrentLocation] = useState<LocationInfo>(CURATED_CITIES[0]);
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [microProfile, setMicroProfile] = useState<MicroProfile>('General');
   const [airData, setAirData] = useState<AirQualityResponse | null>(null);
@@ -36,19 +36,25 @@ export const App: React.FC = () => {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isEmergencyPlanOpen, setIsEmergencyPlanOpen] = useState(false);
 
-  // Dark Mode
+  // Dark Mode with LocalStorage Persistence
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('breathe_better_theme');
+      if (saved) return saved === 'dark';
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     return false;
   });
 
+  // Apply dark mode class to html element and sync localStorage
   useEffect(() => {
+    const root = document.documentElement;
     if (darkMode) {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
+      localStorage.setItem('breathe_better_theme', 'dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
+      localStorage.setItem('breathe_better_theme', 'light');
     }
   }, [darkMode]);
 
@@ -70,9 +76,28 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // Automatic Location Detection on First Load
   useEffect(() => {
-    loadData(currentLocation);
-  }, [currentLocation, loadData]);
+    let isMounted = true;
+    async function initLocation() {
+      setIsLoading(true);
+      try {
+        const detectedLoc = await detectAutoLocation();
+        if (isMounted) {
+          setCurrentLocation(detectedLoc);
+          await loadData(detectedLoc);
+        }
+      } catch (e) {
+        console.warn('Auto location detection failed, loading default city:', e);
+        if (isMounted) {
+          await loadData(CURATED_CITIES[0]);
+        }
+      }
+    }
+
+    initLocation();
+    return () => { isMounted = false; };
+  }, [loadData]);
 
   // Auto-refresh every 90 seconds
   useEffect(() => {
@@ -84,10 +109,11 @@ export const App: React.FC = () => {
 
   const handleSelectLocation = (loc: LocationInfo) => {
     setCurrentLocation(loc);
+    loadData(loc);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-white transition-colors duration-200">
       
       {/* Top Navigation Bar */}
       <Navbar
@@ -120,7 +146,7 @@ export const App: React.FC = () => {
             </div>
             <button
               onClick={() => loadData(currentLocation)}
-              className="px-3 py-1 bg-rose-600 text-white font-semibold rounded-lg hover:bg-rose-700 transition-colors"
+              className="px-3 py-1 bg-rose-600 text-white font-semibold rounded-lg hover:bg-rose-700 transition-colors cursor-pointer"
             >
               Retry Connection
             </button>
@@ -133,7 +159,7 @@ export const App: React.FC = () => {
         {isLoading && !airData ? (
           <div className="min-h-[450px] flex flex-col items-center justify-center space-y-3">
             <RefreshCw className="w-7 h-7 text-emerald-600 dark:text-emerald-400 animate-spin" />
-            <p className="text-xs font-semibold text-slate-500">
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
               Querying Copernicus Atmosphere Monitoring Service (CAMS)...
             </p>
           </div>
@@ -154,6 +180,7 @@ export const App: React.FC = () => {
                 currentLocation={currentLocation}
                 onSelectLocation={handleSelectLocation}
                 onNavigateToTab={setActiveTab}
+                darkMode={darkMode}
               />
             )}
 
@@ -270,7 +297,7 @@ export const App: React.FC = () => {
               onClick={() => setIsAuditOpen(true)}
               className="hover:underline text-slate-700 dark:text-slate-300 cursor-pointer"
             >
-              Audit Log
+              Source Audit & Keys
             </button>
           </div>
         </div>
