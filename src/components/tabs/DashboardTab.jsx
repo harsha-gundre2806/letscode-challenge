@@ -19,7 +19,8 @@ import {
   ArrowRight,
   CheckCircle2,
   CloudSun,
-  Navigation
+  Navigation,
+  Info
 } from 'lucide-react';
 
 export const DashboardTab = ({
@@ -173,6 +174,24 @@ export const DashboardTab = ({
               </div>
             </div>
 
+            {/* City Averaging & Accuracy Notice Box (Highlighted Box above Air Quality Index) */}
+            <div className="mt-4 p-3.5 rounded-xl border border-amber-300 dark:border-amber-700/80 bg-amber-50/90 dark:bg-amber-950/40 text-xs">
+              <div className="flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                    <span>Atmospheric Measurement & Geographic Averaging Note</span>
+                  </div>
+                  <p className="text-amber-800 dark:text-amber-200 leading-relaxed font-semibold">
+                    The details are not 100% accurate and these are average of certain locations in the city to get more accuracy.
+                  </p>
+                  <p className="text-[11px] text-amber-700/90 dark:text-amber-300/80 leading-normal">
+                    Ground-level pollution can fluctuate across localized street micro-climates; values shown represent a verified multi-station composite average across {airData.location.name}.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Big Score & Gauge */}
             <div className="py-6 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
               <div>
@@ -183,9 +202,12 @@ export const DashboardTab = ({
                   <div className="text-6xl sm:text-7xl font-black tracking-tight text-slate-900 dark:text-white font-mono">
                     {aqi}
                   </div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">
+                  <div className="text-sm text-slate-500 dark:text-slate-400 space-y-0.5">
                     <div>European AQI: <span className="font-semibold text-slate-800 dark:text-slate-200">{current.european_aqi}</span></div>
-                    <div>Dominant Pollutant: <span className="font-semibold text-slate-800 dark:text-slate-200">PM2.5</span></div>
+                    {current.indian_aqi !== undefined && (
+                      <div>Indian NAQI (CPCB): <span className="font-semibold text-slate-800 dark:text-slate-200">{current.indian_aqi}</span></div>
+                    )}
+                    <div>Dominant Pollutant: <span className="font-semibold text-slate-800 dark:text-slate-200">{current.dominant_pollutant || 'PM2.5'}</span></div>
                   </div>
                 </div>
               </div>
