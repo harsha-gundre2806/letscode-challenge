@@ -1,19 +1,18 @@
-import { AirQualityResponse, MicroProfile } from '../types/airQuality';
 import { getAQICategory, getProfileHealthWarning } from '../utils/aqiUtils';
 
 class SpeechService {
-  private synth: SpeechSynthesis | null = null;
-  private currentUtterance: SpeechSynthesisUtterance | null = null;
-  private isSpeaking = false;
-  private listeners: ((speaking: boolean) => void)[] = [];
-
   constructor() {
+    this.synth = null;
+    this.currentUtterance = null;
+    this.isSpeaking = false;
+    this.listeners = [];
+
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.synth = window.speechSynthesis;
     }
   }
 
-  public subscribe(listener: (speaking: boolean) => void): () => void {
+  subscribe(listener) {
     this.listeners.push(listener);
     listener(this.isSpeaking);
     return () => {
@@ -21,11 +20,11 @@ class SpeechService {
     };
   }
 
-  private notify() {
+  notify() {
     this.listeners.forEach(l => l(this.isSpeaking));
   }
 
-  public playAirBriefing(data: AirQualityResponse, profile: MicroProfile) {
+  playAirBriefing(data, profile) {
     if (!this.synth) {
       alert('Speech synthesis is not supported on this browser.');
       return;
@@ -74,7 +73,7 @@ Stay safe, monitor your exposure, and breathe better.`;
     this.synth.speak(utterance);
   }
 
-  public stop() {
+  stop() {
     if (this.synth) {
       this.synth.cancel();
       this.isSpeaking = false;
@@ -82,7 +81,7 @@ Stay safe, monitor your exposure, and breathe better.`;
     }
   }
 
-  public getSpeakingState(): boolean {
+  getSpeakingState() {
     return this.isSpeaking;
   }
 }

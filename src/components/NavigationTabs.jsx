@@ -12,24 +12,7 @@ import {
   Trophy 
 } from 'lucide-react';
 
-export type TabId = 
-  | 'dashboard' 
-  | 'map' 
-  | 'history' 
-  | 'forecast' 
-  | 'compare' 
-  | 'health' 
-  | 'exposure' 
-  | 'simulator' 
-  | 'assistant' 
-  | 'leaderboard';
-
-interface NavigationTabsProps {
-  activeTab: TabId;
-  onChangeTab: (tab: TabId) => void;
-}
-
-const TABS: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
+const TABS = [
   { id: 'dashboard', label: 'Live Dashboard', icon: LayoutDashboard },
   { id: 'map', label: 'Pollution Map', icon: Map },
   { id: 'history', label: 'Historical Trends', icon: History },
@@ -42,7 +25,7 @@ const TABS: { id: TabId; label: string; icon: React.FC<{ className?: string }> }
   { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
 ];
 
-export const NavigationTabs: React.FC<NavigationTabsProps> = ({ activeTab, onChangeTab }) => {
+export const NavigationTabs = ({ activeTab, onChangeTab }) => {
   return (
     <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-16 z-30 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

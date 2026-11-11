@@ -1,17 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  AirQualityResponse, 
-  HourlyDataPoint 
-} from '../../types/airQuality';
 import { detectAnomalies } from '../../services/airQualityService';
 import { 
   History, 
   TrendingUp, 
   TrendingDown, 
   AlertTriangle, 
-  Calendar, 
   Activity, 
-  Clock,
   Sparkles
 } from 'lucide-react';
 import { 
@@ -25,15 +19,9 @@ import {
   Legend 
 } from 'recharts';
 
-interface HistoryTabProps {
-  airData: AirQualityResponse;
-  onNavigateToTab: (tab: any) => void;
-  darkMode?: boolean;
-}
-
-export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab, darkMode = false }) => {
-  const [selectedMetric, setSelectedMetric] = useState<'both' | 'pm25' | 'pm10' | 'aqi'>('both');
-  const [historyRangeDays, setHistoryRangeDays] = useState<3 | 7>(7);
+export const HistoryTab = ({ airData, onNavigateToTab, darkMode = false }) => {
+  const [selectedMetric, setSelectedMetric] = useState('both');
+  const [historyRangeDays, setHistoryRangeDays] = useState(7);
 
   // Filter history based on range
   const historySlice = useMemo(() => {

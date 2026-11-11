@@ -1,11 +1,4 @@
-import { 
-  AirQualityResponse, 
-  LocationInfo, 
-  HourlyDataPoint, 
-  AnomalySpike 
-} from '../types/airQuality';
-
-export const CURATED_CITIES: LocationInfo[] = [
+export const CURATED_CITIES = [
   { name: 'Hyderabad', country: 'India', latitude: 17.3850, longitude: 78.4867, admin1: 'Telangana', timezone: 'Asia/Kolkata' },
   { name: 'New Delhi', country: 'India', latitude: 28.6139, longitude: 77.2090, admin1: 'Delhi', timezone: 'Asia/Kolkata' },
   { name: 'Mumbai', country: 'India', latitude: 19.0760, longitude: 72.8777, admin1: 'Maharashtra', timezone: 'Asia/Kolkata' },
@@ -22,8 +15,7 @@ export const CURATED_CITIES: LocationInfo[] = [
   { name: 'Reykjavik', country: 'Iceland', latitude: 64.1466, longitude: -21.9426, admin1: 'Capital Region', timezone: 'Atlantic/Reykjavik' },
 ];
 
-// Interpret WMO weather codes
-function interpretWeatherCode(code: number): string {
+function interpretWeatherCode(code) {
   if (code === 0) return 'Clear Sky';
   if (code === 1 || code === 2) return 'Mainly Clear / Partly Cloudy';
   if (code === 3) return 'Overcast';
@@ -36,12 +28,10 @@ function interpretWeatherCode(code: number): string {
   return 'Atmospheric Haze';
 }
 
-// Automatic Location Detection: GPS first, then secure HTTPS IP Geolocation
-export async function detectAutoLocation(): Promise<LocationInfo> {
-  // 1. Try browser high-accuracy GPS with a 4s timeout
+export async function detectAutoLocation() {
   if (typeof navigator !== 'undefined' && 'geolocation' in navigator) {
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      const position = await new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 4000,
@@ -60,7 +50,6 @@ export async function detectAutoLocation(): Promise<LocationInfo> {
     }
   }
 
-  // 2. HTTPS IP Geolocation Fallback
   try {
     const res = await fetch('https://get.geojs.io/v1/ip/geo.json');
     if (res.ok) {
@@ -81,14 +70,13 @@ export async function detectAutoLocation(): Promise<LocationInfo> {
     console.warn('IP Geolocation fallback failed:', ipError);
   }
 
-  // 3. Graceful fallback
   return {
     ...CURATED_CITIES[0],
     isAutoDetected: false,
   };
 }
 
-export async function searchLocations(query: string): Promise<LocationInfo[]> {
+export async function searchLocations(query) {
   if (!query || query.trim().length < 2) return [];
   try {
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=en&format=json`;
@@ -97,7 +85,7 @@ export async function searchLocations(query: string): Promise<LocationInfo[]> {
     const data = await res.json();
     if (!data.results) return [];
 
-    return data.results.map((item: any) => ({
+    return data.results.map(item => ({
       name: item.name,
       country: item.country || '',
       latitude: item.latitude,
@@ -112,7 +100,7 @@ export async function searchLocations(query: string): Promise<LocationInfo[]> {
   }
 }
 
-export async function reverseGeocode(lat: number, lon: number): Promise<LocationInfo> {
+export async function reverseGeocode(lat, lon) {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`,
@@ -143,12 +131,11 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Location
   };
 }
 
-export async function fetchAirQualityData(location: LocationInfo): Promise<AirQualityResponse> {
+export async function fetchAirQualityData(location) {
   const startTime = performance.now();
   const airQualityEndpoint = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${location.latitude}&longitude=${location.longitude}&current=european_aqi,us_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust,uv_index&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,us_aqi,european_aqi&past_days=7&forecast_days=7&timezone=auto`;
   const weatherEndpoint = `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&timezone=auto`;
 
-  // Fetch both Air Quality and Meteorological data in parallel
   const [aqRes, weatherRes] = await Promise.all([
     fetch(airQualityEndpoint),
     fetch(weatherEndpoint).catch(() => null),
@@ -168,15 +155,7 @@ export async function fetchAirQualityData(location: LocationInfo): Promise<AirQu
     throw new Error('Incomplete data received from atmospheric monitoring network');
   }
 
-  // Parse weather details
-  let weatherData: {
-    temperature?: number;
-    humidity?: number;
-    wind_speed?: number;
-    wind_direction?: number;
-    weather_condition?: string;
-  } = {};
-
+  let weatherData = {};
   if (weatherRes && weatherRes.ok) {
     try {
       const wJson = await weatherRes.json();
@@ -194,8 +173,7 @@ export async function fetchAirQualityData(location: LocationInfo): Promise<AirQu
     }
   }
 
-  // Parse hourly data points
-  const allHourly: HourlyDataPoint[] = [];
+  const allHourly = [];
   const nowIso = new Date().toISOString();
 
   if (hourlyRaw.time && Array.isArray(hourlyRaw.time)) {
@@ -250,10 +228,10 @@ export async function fetchAirQualityData(location: LocationInfo): Promise<AirQu
   };
 }
 
-export function detectAnomalies(history: HourlyDataPoint[]): AnomalySpike[] {
-  if (history.length < 12) return [];
+export function detectAnomalies(history) {
+  if (!history || history.length < 12) return [];
 
-  const anomalies: AnomalySpike[] = [];
+  const anomalies = [];
   const windowSize = 12;
 
   for (let i = windowSize; i < history.length; i++) {
@@ -263,7 +241,7 @@ export function detectAnomalies(history: HourlyDataPoint[]): AnomalySpike[] {
 
     if (avgPm25 > 10 && currentPoint.pm2_5 > avgPm25 * 1.55) {
       const percentageSpike = Math.round(((currentPoint.pm2_5 - avgPm25) / avgPm25) * 100);
-      let severity: 'Moderate' | 'Severe' | 'Critical' = 'Moderate';
+      let severity = 'Moderate';
       let potentialCause = 'Localized particulate buildup, thermal inversion, or vehicular congestion surge.';
 
       if (percentageSpike > 120 || currentPoint.pm2_5 > 200) {

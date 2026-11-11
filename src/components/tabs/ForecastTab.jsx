@@ -1,18 +1,11 @@
 import React, { useMemo } from 'react';
-import { AirQualityResponse } from '../../types/airQuality';
 import { calculateAeroSafeWindow } from '../../services/safeWindowEngine';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
   CalendarDays, 
   Sparkles, 
-  Clock, 
-  Sun, 
   ShieldCheck, 
-  Activity, 
-  TrendingUp, 
-  CheckCircle2,
-  Wind,
-  Footprints
+  Activity 
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -25,13 +18,7 @@ import {
   Legend 
 } from 'recharts';
 
-interface ForecastTabProps {
-  airData: AirQualityResponse;
-  onNavigateToTab: (tab: any) => void;
-  darkMode?: boolean;
-}
-
-export const ForecastTab: React.FC<ForecastTabProps> = ({ airData, onNavigateToTab, darkMode = false }) => {
+export const ForecastTab = ({ airData, onNavigateToTab, darkMode = false }) => {
   // Calculate Aero-Predictive Safe Window
   const safeWindow = useMemo(() => {
     return calculateAeroSafeWindow(airData.forecast);
@@ -39,7 +26,7 @@ export const ForecastTab: React.FC<ForecastTabProps> = ({ airData, onNavigateToT
 
   // Aggregate 7-Day Daily Forecast Summaries
   const dailyForecast = useMemo(() => {
-    const daysMap = new Map<string, { aqiSum: number; pm25Sum: number; count: number; dateStr: string }>();
+    const daysMap = new Map();
 
     airData.forecast.forEach(point => {
       const d = new Date(point.time);

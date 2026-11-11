@@ -1,5 +1,4 @@
 import React from 'react';
-import { AirQualityResponse, MicroProfile } from '../types/airQuality';
 import { getAQICategory } from '../utils/aqiUtils';
 import { 
   X, 
@@ -7,19 +6,10 @@ import {
   AlertTriangle, 
   ShieldAlert, 
   PhoneCall, 
-  CheckCircle2, 
-  Wind,
-  FileText
+  CheckCircle2
 } from 'lucide-react';
 
-interface EmergencyPlanModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  airData: AirQualityResponse | null;
-  microProfile: MicroProfile;
-}
-
-export const EmergencyPlanModal: React.FC<EmergencyPlanModalProps> = ({
+export const EmergencyPlanModal = ({
   isOpen,
   onClose,
   airData,
@@ -56,14 +46,14 @@ export const EmergencyPlanModal: React.FC<EmergencyPlanModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print / Save PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -75,7 +65,7 @@ export const EmergencyPlanModal: React.FC<EmergencyPlanModalProps> = ({
           
           {/* Official Document Banner */}
           <div className="border border-slate-300 dark:border-slate-700 rounded-xl p-4 bg-slate-50 dark:bg-slate-800">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
+            <div className="flex flex-col sm:row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
               <div>
                 <div className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                   BreatheBetter Environmental Health Protocol
@@ -207,7 +197,7 @@ export const EmergencyPlanModal: React.FC<EmergencyPlanModalProps> = ({
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
+            className="px-4 py-1.5 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors cursor-pointer"
           >
             Close Plan
           </button>

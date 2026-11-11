@@ -1,7 +1,6 @@
-import { HourlyDataPoint, SafeWindowResult } from '../types/airQuality';
 import { getAQICategory } from '../utils/aqiUtils';
 
-export function calculateAeroSafeWindow(forecast: HourlyDataPoint[]): SafeWindowResult | null {
+export function calculateAeroSafeWindow(forecast) {
   if (!forecast || forecast.length < 4) return null;
 
   // Evaluate the next 24 hours of forecast
@@ -14,7 +13,6 @@ export function calculateAeroSafeWindow(forecast: HourlyDataPoint[]): SafeWindow
     const point1 = upcoming[i];
     const point2 = upcoming[i + 1];
     const avgAqi = (point1.us_aqi + point2.us_aqi) / 2;
-    const avgPm25 = (point1.pm2_5 + point2.pm2_5) / 2;
 
     // Favor daylight hours (06:00 - 20:00) slightly for exercise usability
     const hour = new Date(point1.time).getHours();

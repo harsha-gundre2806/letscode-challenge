@@ -1,32 +1,20 @@
 import React, { useState, useMemo } from 'react';
-import { AirQualityResponse } from '../../types/airQuality';
 import { calculatePersonalExposure } from '../../services/exposureCalculator';
 import { 
   Footprints, 
   Bike, 
   Car, 
   Bus, 
-  Clock, 
-  AlertTriangle, 
-  ShieldCheck, 
-  CheckCircle2, 
-  ArrowRight,
-  Sparkles,
-  TrendingDown
+  Sparkles 
 } from 'lucide-react';
 
-interface ExposureTrackerTabProps {
-  airData: AirQualityResponse;
-  onNavigateToTab: (tab: any) => void;
-}
-
-export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
+export const ExposureTrackerTab = ({
   airData,
   onNavigateToTab,
 }) => {
-  const [commuteMode, setCommuteMode] = useState<'walking' | 'cycling' | 'driving' | 'transit'>('cycling');
-  const [durationMinutes, setDurationMinutes] = useState<number>(30);
-  const [tripsCount, setTripsCount] = useState<number>(2); // Round trip
+  const [commuteMode, setCommuteMode] = useState('cycling');
+  const [durationMinutes, setDurationMinutes] = useState(30);
+  const [tripsCount, setTripsCount] = useState(2); // Round trip
 
   const singleTripResult = useMemo(() => {
     return calculatePersonalExposure({
@@ -40,7 +28,7 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
   const totalDailyDose = Number((singleTripResult.inhaledDoseMicrograms * tripsCount).toFixed(1));
   const totalDailyThresholdPercent = Math.min(999, Math.round((totalDailyDose / 225) * 100));
 
-  const modes: { id: 'walking' | 'cycling' | 'driving' | 'transit'; label: string; icon: React.FC<{ className?: string }>; desc: string }[] = [
+  const modes = [
     { id: 'cycling', label: 'Bicycle / E-Bike', icon: Bike, desc: 'High tidal volume (36 L/min). Highest particulate intake.' },
     { id: 'walking', label: 'Walking / Jogging', icon: Footprints, desc: 'Moderate respiration (16 L/min). Direct open air.' },
     { id: 'driving', label: 'Personal Car (AC)', icon: Car, desc: 'Low exertion (7.5 L/min). Cabin filter cuts ~65% PM2.5.' },

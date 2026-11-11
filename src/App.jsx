@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { LocationInfo, MicroProfile, AirQualityResponse } from './types/airQuality';
 import { CURATED_CITIES, fetchAirQualityData, detectAutoLocation } from './services/airQualityService';
 import { Navbar } from './components/Navbar';
-import { NavigationTabs, TabId } from './components/NavigationTabs';
+import { NavigationTabs } from './components/NavigationTabs';
 import { NextStepGuide } from './components/NextStepGuide';
 import { AuditDrawer } from './components/AuditDrawer';
 import { EmergencyPlanModal } from './components/EmergencyPlanModal';
@@ -22,14 +21,14 @@ import { LeaderboardTab } from './components/tabs/LeaderboardTab';
 
 import { RefreshCw, AlertCircle, Wind } from 'lucide-react';
 
-export const App: React.FC = () => {
-  const [currentLocation, setCurrentLocation] = useState<LocationInfo>(CURATED_CITIES[0]);
-  const [activeTab, setActiveTab] = useState<TabId>('dashboard');
-  const [microProfile, setMicroProfile] = useState<MicroProfile>('General');
-  const [airData, setAirData] = useState<AirQualityResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const App = () => {
+  const [currentLocation, setCurrentLocation] = useState(CURATED_CITIES[0]);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [microProfile, setMicroProfile] = useState('General');
+  const [airData, setAirData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   // Modals & Drawers
   const [isAuditOpen, setIsAuditOpen] = useState(false);
@@ -37,7 +36,7 @@ export const App: React.FC = () => {
   const [isEmergencyPlanOpen, setIsEmergencyPlanOpen] = useState(false);
 
   // Dark Mode with LocalStorage Persistence
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
+  const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('breathe_better_theme');
       if (saved) return saved === 'dark';
@@ -59,7 +58,7 @@ export const App: React.FC = () => {
   }, [darkMode]);
 
   // Load Air Quality Data
-  const loadData = useCallback(async (loc: LocationInfo, isSilent = false) => {
+  const loadData = useCallback(async (loc, isSilent = false) => {
     if (!isSilent) setIsLoading(true);
     else setIsRefreshing(true);
     setError(null);
@@ -67,7 +66,7 @@ export const App: React.FC = () => {
     try {
       const data = await fetchAirQualityData(loc);
       setAirData(data);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to load air quality data:', err);
       setError(err?.message || 'Unable to connect to Copernicus Atmospheric API. Please verify network access.');
     } finally {
@@ -107,9 +106,23 @@ export const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [currentLocation, loadData]);
 
-  const handleSelectLocation = (loc: LocationInfo) => {
+  const handleSelectLocation = (loc) => {
     setCurrentLocation(loc);
     loadData(loc);
+  };
+
+  const handleUseCurrentLocation = async () => {
+    setIsLoading(true);
+    try {
+      const loc = await detectAutoLocation();
+      setCurrentLocation(loc);
+      await loadData(loc);
+    } catch (e) {
+      console.warn('Current location detection error:', e);
+      setError('Unable to detect current place or location. Please allow browser location access.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -172,6 +185,7 @@ export const App: React.FC = () => {
                 onSelectCity={handleSelectLocation}
                 onOpenEmergencyPlan={() => setIsEmergencyPlanOpen(true)}
                 onNavigateToTab={setActiveTab}
+                onUseCurrentLocation={handleUseCurrentLocation}
               />
             )}
 

@@ -1,9 +1,4 @@
 import React from 'react';
-import { 
-  AirQualityResponse, 
-  MicroProfile, 
-  LocationInfo 
-} from '../../types/airQuality';
 import { CURATED_CITIES } from '../../services/airQualityService';
 import { 
   getAQICategory, 
@@ -22,27 +17,18 @@ import {
   Compass,
   FileText, 
   ArrowRight,
-  TrendingUp,
   CheckCircle2,
-  Sparkles,
   CloudSun,
   Navigation
 } from 'lucide-react';
 
-interface DashboardTabProps {
-  airData: AirQualityResponse;
-  microProfile: MicroProfile;
-  onSelectCity: (city: LocationInfo) => void;
-  onOpenEmergencyPlan: () => void;
-  onNavigateToTab: (tab: any) => void;
-}
-
-export const DashboardTab: React.FC<DashboardTabProps> = ({
+export const DashboardTab = ({
   airData,
   microProfile,
   onSelectCity,
   onOpenEmergencyPlan,
   onNavigateToTab,
+  onUseCurrentLocation,
 }) => {
   const current = airData.current;
   const aqi = current.us_aqi;
@@ -109,14 +95,29 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Quick City Selector Bar with Auto-Detect Status */}
+      {/* Quick City Selector Bar with Your Location Button */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider shrink-0 flex items-center gap-1">
           <MapPin className="w-3.5 h-3.5" />
           <span>Quick Benchmark:</span>
         </span>
+
+        {/* Your Location button at the starting */}
+        <button
+          onClick={onUseCurrentLocation}
+          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 ${
+            airData.location.isAutoDetected
+              ? 'bg-emerald-600 text-white font-semibold'
+              : 'bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60'
+          }`}
+          title="Detect and view your current location's live atmospheric details"
+        >
+          <Navigation className="w-3.5 h-3.5" />
+          <span>Your Location</span>
+        </button>
+
         {CURATED_CITIES.map(city => {
-          const isSelected = city.name === airData.location.name;
+          const isSelected = !airData.location.isAutoDetected && city.name === airData.location.name;
           return (
             <button
               key={city.name}

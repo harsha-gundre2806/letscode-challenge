@@ -1,28 +1,15 @@
 import React from 'react';
-import { AirQualityResponse, MicroProfile } from '../../types/airQuality';
 import { AQI_LEVELS, getAQICategory } from '../../utils/aqiUtils';
 import { 
   HeartPulse, 
-  ShieldAlert, 
   Activity, 
   FileText, 
   Wind, 
-  AlertTriangle, 
-  CheckCircle2, 
-  HelpCircle,
-  Eye,
-  ShieldCheck,
-  Stethoscope
+  ShieldCheck, 
+  Stethoscope 
 } from 'lucide-react';
 
-interface HealthCenterTabProps {
-  airData: AirQualityResponse;
-  microProfile: MicroProfile;
-  onOpenEmergencyPlan: () => void;
-  onNavigateToTab: (tab: any) => void;
-}
-
-export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
+export const HealthCenterTab = ({
   airData,
   microProfile,
   onOpenEmergencyPlan,

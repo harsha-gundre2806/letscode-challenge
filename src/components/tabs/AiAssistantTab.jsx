@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AirQualityResponse, MicroProfile } from '../../types/airQuality';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { askGeminiOrFallback, getEffectiveGeminiApiKey } from '../../services/aiService';
 import { 
@@ -8,33 +7,18 @@ import {
   Sparkles, 
   Volume2, 
   Square, 
-  User, 
-  Key,
-  ShieldCheck
+  User 
 } from 'lucide-react';
 
-interface AiAssistantTabProps {
-  airData: AirQualityResponse;
-  microProfile: MicroProfile;
-  onNavigateToTab: (tab: any) => void;
-}
-
-interface ChatMessage {
-  id: string;
-  sender: 'ai' | 'user';
-  text: string;
-  timestamp: string;
-}
-
-export const AiAssistantTab: React.FC<AiAssistantTabProps> = ({
+export const AiAssistantTab = ({
   airData,
   microProfile,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [speakingId, setSpeakingId] = useState<string | null>(null);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [speakingId, setSpeakingId] = useState(null);
+  const chatBottomRef = useRef(null);
 
   const aqi = airData.current.us_aqi;
   const category = getAQICategory(aqi, microProfile);
@@ -64,11 +48,11 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSendMessage = async (textToSend?: string) => {
+  const handleSendMessage = async (textToSend) => {
     const text = textToSend || inputMessage;
     if (!text.trim()) return;
 
-    const userMsg: ChatMessage = {
+    const userMsg = {
       id: `user-${Date.now()}`,
       sender: 'user',
       text,
@@ -81,7 +65,7 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
 
     try {
       const responseText = await askGeminiOrFallback(text, airData, microProfile);
-      const aiMsg: ChatMessage = {
+      const aiMsg = {
         id: `ai-${Date.now()}`,
         sender: 'ai',
         text: responseText,
@@ -95,7 +79,7 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
     }
   };
 
-  const handleSpeak = (msgId: string, text: string) => {
+  const handleSpeak = (msgId, text) => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     if (speakingId === msgId) {

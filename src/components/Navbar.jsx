@@ -9,29 +9,13 @@ import {
   Moon, 
   Sun, 
   UserCheck, 
-  AlertCircle,
   Share2,
   RefreshCw
 } from 'lucide-react';
-import { LocationInfo, MicroProfile, AirQualityResponse } from '../types/airQuality';
 import { searchLocations, reverseGeocode } from '../services/airQualityService';
 import { speechService } from '../services/speechService';
 
-interface NavbarProps {
-  currentLocation: LocationInfo;
-  onSelectLocation: (loc: LocationInfo) => void;
-  microProfile: MicroProfile;
-  onChangeProfile: (p: MicroProfile) => void;
-  airData: AirQualityResponse | null;
-  onOpenAudit: () => void;
-  onOpenShare: () => void;
-  onRefresh: () => void;
-  isRefreshing: boolean;
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
-}
-
-const PROFILES: { id: MicroProfile; label: string; desc: string }[] = [
+const PROFILES = [
   { id: 'General', label: 'General Public', desc: 'Standard EPA/WHO thresholds' },
   { id: 'Asthmatic', label: 'Asthmatic', desc: 'Heightened bronchial sensitivity (WHO strict)' },
   { id: 'Senior', label: 'Senior (65+)', desc: 'Cardiovascular protection protocols' },
@@ -40,7 +24,7 @@ const PROFILES: { id: MicroProfile; label: string; desc: string }[] = [
   { id: 'Child', label: 'Child / Pediatric', desc: 'Underdeveloped respiratory shield' },
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({
+export const Navbar = ({
   currentLocation,
   onSelectLocation,
   microProfile,
@@ -54,13 +38,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleDarkMode,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<LocationInfo[]>([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef(null);
+  const profileMenuRef = useRef(null);
 
   // Subscribe to speech state
   useEffect(() => {
@@ -72,11 +56,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   // Handle outside clicks
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+    function handleClickOutside(event) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setShowSearchDropdown(false);
       }
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setShowProfileMenu(false);
       }
     }

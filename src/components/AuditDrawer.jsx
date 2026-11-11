@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { AirQualityResponse } from '../types/airQuality';
 import { getEffectiveGeminiApiKey, setCustomGeminiApiKey } from '../services/aiService';
 import { 
   X, 
@@ -14,13 +13,7 @@ import {
   Save
 } from 'lucide-react';
 
-interface AuditDrawerProps {
-  isOpen: boolean;
-  onClose: () => void;
-  airData: AirQualityResponse | null;
-}
-
-export const AuditDrawer: React.FC<AuditDrawerProps> = ({
+export const AuditDrawer = ({
   isOpen,
   onClose,
   airData,

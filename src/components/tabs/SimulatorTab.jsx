@@ -1,12 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { AirQualityResponse } from '../../types/airQuality';
-import { simulatePolicyIntervention, WhatIfParams } from '../../services/whatIfSimulator';
+import { simulatePolicyIntervention } from '../../services/whatIfSimulator';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
   SlidersHorizontal, 
-  Sparkles, 
   Activity, 
-  TrendingDown, 
   TreePine, 
   Car, 
   Factory, 
@@ -24,18 +21,12 @@ import {
   Legend 
 } from 'recharts';
 
-interface SimulatorTabProps {
-  airData: AirQualityResponse;
-  onNavigateToTab: (tab: any) => void;
-  darkMode?: boolean;
-}
-
-export const SimulatorTab: React.FC<SimulatorTabProps> = ({
+export const SimulatorTab = ({
   airData,
   onNavigateToTab,
   darkMode = false,
 }) => {
-  const [params, setParams] = useState<WhatIfParams>({
+  const [params, setParams] = useState({
     trafficReduction: 30,
     industrialControl: 20,
     greenCoverIncrease: 15,
@@ -59,7 +50,7 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
   }, [simulationResult]);
 
   // Pre-configured Policy Presets
-  const applyPreset = (preset: 'traffic' | 'industrial' | 'green' | 'comprehensive') => {
+  const applyPreset = (preset) => {
     switch (preset) {
       case 'traffic':
         setParams({ trafficReduction: 50, industrialControl: 10, greenCoverIncrease: 5, windDispersion: 0 });
@@ -72,6 +63,8 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
         break;
       case 'comprehensive':
         setParams({ trafficReduction: 40, industrialControl: 35, greenCoverIncrease: 25, windDispersion: 10 });
+        break;
+      default:
         break;
     }
   };
@@ -105,7 +98,7 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
         {/* Reset Button */}
         <button
           onClick={resetParams}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset Sliders</span>

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { LocationInfo } from '../../types/airQuality';
 import { reverseGeocode, fetchAirQualityData } from '../../services/airQualityService';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
@@ -11,22 +10,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-interface MapTabProps {
-  currentLocation: LocationInfo;
-  onSelectLocation: (loc: LocationInfo) => void;
-  onNavigateToTab: (tab: any) => void;
-  darkMode?: boolean;
-}
-
-interface MapCityMarker {
-  location: LocationInfo;
-  aqi: number;
-  pm25: number;
-  isHotspot: boolean;
-  isCleanPocket: boolean;
-}
-
-const GLOBAL_BENCHMARK_STATIONS: MapCityMarker[] = [
+const GLOBAL_BENCHMARK_STATIONS = [
   { location: { name: 'Hyderabad', country: 'India', latitude: 17.3850, longitude: 78.4867 }, aqi: 128, pm25: 46, isHotspot: false, isCleanPocket: false },
   { location: { name: 'New Delhi', country: 'India', latitude: 28.6139, longitude: 77.2090 }, aqi: 245, pm25: 110, isHotspot: true, isCleanPocket: false },
   { location: { name: 'Lahore', country: 'Pakistan', latitude: 31.5204, longitude: 74.3587 }, aqi: 280, pm25: 145, isHotspot: true, isCleanPocket: false },
@@ -44,19 +28,19 @@ const GLOBAL_BENCHMARK_STATIONS: MapCityMarker[] = [
   { location: { name: 'Singapore', country: 'Singapore', latitude: 1.3521, longitude: 103.8198 }, aqi: 52, pm25: 14, isHotspot: false, isCleanPocket: true },
 ];
 
-export const MapTab: React.FC<MapTabProps> = ({
+export const MapTab = ({
   currentLocation,
   onSelectLocation,
   onNavigateToTab,
   darkMode = false,
 }) => {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const tileLayerRef = useRef<L.TileLayer | null>(null);
-  const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const mapContainerRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
+  const markersLayerRef = useRef(null);
 
-  const [activePollutantLayer, setActivePollutantLayer] = useState<'aqi' | 'pm25'>('aqi');
-  const [selectedStation, setSelectedStation] = useState<MapCityMarker | null>(null);
+  const [activePollutantLayer, setActivePollutantLayer] = useState('aqi');
+  const [selectedStation, setSelectedStation] = useState(null);
   const [isFetchingCoord, setIsFetchingCoord] = useState(false);
 
   // Initialize Map
@@ -87,14 +71,14 @@ export const MapTab: React.FC<MapTabProps> = ({
       mapInstanceRef.current = map;
 
       // Click anywhere on Earth to query authentic air quality
-      map.on('click', async (e: L.LeafletMouseEvent) => {
+      map.on('click', async (e) => {
         const { lat, lng } = e.latlng;
         setIsFetchingCoord(true);
 
         try {
           const loc = await reverseGeocode(lat, lng);
           const data = await fetchAirQualityData(loc);
-          const customMarker: MapCityMarker = {
+          const customMarker = {
             location: loc,
             aqi: data.current.us_aqi,
             pm25: data.current.pm2_5,
@@ -183,7 +167,7 @@ export const MapTab: React.FC<MapTabProps> = ({
     });
   }, [activePollutantLayer, selectedStation, darkMode]);
 
-  const handleSelectAsActive = (station: MapCityMarker) => {
+  const handleSelectAsActive = (station) => {
     onSelectLocation(station.location);
     onNavigateToTab('dashboard');
   };
@@ -201,7 +185,7 @@ export const MapTab: React.FC<MapTabProps> = ({
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setActivePollutantLayer('aqi')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 activePollutantLayer === 'aqi'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -211,7 +195,7 @@ export const MapTab: React.FC<MapTabProps> = ({
             </button>
             <button
               onClick={() => setActivePollutantLayer('pm25')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 activePollutantLayer === 'pm25'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'

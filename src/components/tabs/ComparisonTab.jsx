@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { LocationInfo, AirQualityResponse } from '../../types/airQuality';
 import { CURATED_CITIES, fetchAirQualityData } from '../../services/airQualityService';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
   GitCompare, 
   Trophy, 
-  Plus, 
   Trash2, 
-  Activity, 
-  CheckCircle2, 
   BarChart3,
   RefreshCw
 } from 'lucide-react';
@@ -23,26 +19,19 @@ import {
   Legend 
 } from 'recharts';
 
-interface ComparisonTabProps {
-  currentLocation: LocationInfo;
-  currentAirData: AirQualityResponse;
-  onNavigateToTab: (tab: any) => void;
-  darkMode?: boolean;
-}
-
-export const ComparisonTab: React.FC<ComparisonTabProps> = ({
+export const ComparisonTab = ({
   currentLocation,
   currentAirData,
   darkMode = false,
 }) => {
   // Cities to compare: default to active city + 2 benchmarks (e.g. New Delhi, Bengaluru, London)
-  const [comparedCities, setComparedCities] = useState<LocationInfo[]>([
+  const [comparedCities, setComparedCities] = useState([
     currentLocation,
     CURATED_CITIES.find(c => c.name === 'Bengaluru') || CURATED_CITIES[2],
     CURATED_CITIES.find(c => c.name === 'London') || CURATED_CITIES[5],
   ]);
 
-  const [comparisonResults, setComparisonResults] = useState<{ [cityName: string]: AirQualityResponse }>({
+  const [comparisonResults, setComparisonResults] = useState({
     [currentAirData.location.name]: currentAirData,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -52,7 +41,7 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
     let isMounted = true;
     async function loadData() {
       setIsLoading(true);
-      const newMap: { [cityName: string]: AirQualityResponse } = { ...comparisonResults };
+      const newMap = { ...comparisonResults };
 
       for (const city of comparedCities) {
         if (!newMap[city.name]) {
@@ -75,12 +64,12 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
     return () => { isMounted = false; };
   }, [comparedCities]);
 
-  const handleAddCity = (city: LocationInfo) => {
+  const handleAddCity = (city) => {
     if (comparedCities.some(c => c.name === city.name) || comparedCities.length >= 4) return;
     setComparedCities([...comparedCities, city]);
   };
 
-  const handleRemoveCity = (cityName: string) => {
+  const handleRemoveCity = (cityName) => {
     if (comparedCities.length <= 1) return;
     setComparedCities(comparedCities.filter(c => c.name !== cityName));
   };
@@ -88,7 +77,7 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
   // Determine Clean Air Winner
   const validDataList = comparedCities
     .map(c => comparisonResults[c.name])
-    .filter((d): d is AirQualityResponse => Boolean(d));
+    .filter(Boolean);
 
   const winnerData = validDataList.length > 0 
     ? [...validDataList].sort((a, b) => a.current.us_aqi - b.current.us_aqi)[0] 
@@ -149,7 +138,7 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
               e.target.value = '';
             }}
             disabled={comparedCities.length >= 4}
-            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none disabled:opacity-50"
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none disabled:opacity-50 cursor-pointer"
           >
             <option value="">+ Add City to Compare</option>
             {CURATED_CITIES.filter(c => !comparedCities.some(comp => comp.name === c.name)).map(c => (

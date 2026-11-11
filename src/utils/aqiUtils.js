@@ -1,19 +1,4 @@
-import { AQICategory, MicroProfile } from '../types/airQuality';
-
-export interface AQIThresholdConfig {
-  category: AQICategory;
-  min: number;
-  max: number;
-  label: string;
-  badgeBg: string;
-  badgeText: string;
-  borderColor: string;
-  accentColor: string;
-  description: string;
-  generalHealthAdvisory: string;
-}
-
-export const AQI_LEVELS: AQIThresholdConfig[] = [
+export const AQI_LEVELS = [
   {
     category: 'Good',
     min: 0,
@@ -88,15 +73,13 @@ export const AQI_LEVELS: AQIThresholdConfig[] = [
   },
 ];
 
-export function getAQICategory(aqi: number, profile: MicroProfile = 'General'): AQIThresholdConfig {
-  // Vulnerable group adjustments (stricter WHO limits)
+export function getAQICategory(aqi, profile = 'General') {
   let effectiveAqi = aqi;
   if (profile === 'Asthmatic' || profile === 'Child') {
-    effectiveAqi = aqi * 1.35; // Shifts category earlier
+    effectiveAqi = aqi * 1.35;
   } else if (profile === 'Senior' || profile === 'Pregnant') {
     effectiveAqi = aqi * 1.2;
   } else if (profile === 'Athlete') {
-    // High ventilation rate increases inhaled toxic volume
     effectiveAqi = aqi * 1.15;
   }
 
@@ -108,11 +91,7 @@ export function getAQICategory(aqi: number, profile: MicroProfile = 'General'): 
   return AQI_LEVELS[AQI_LEVELS.length - 1];
 }
 
-export function getProfileHealthWarning(profile: MicroProfile, aqi: number): {
-  badgeTitle: string;
-  warningText: string;
-  severity: 'low' | 'moderate' | 'high' | 'critical';
-} {
+export function getProfileHealthWarning(profile, aqi) {
   switch (profile) {
     case 'Asthmatic':
       if (aqi > 100) {
@@ -195,7 +174,7 @@ export function getProfileHealthWarning(profile: MicroProfile, aqi: number): {
   }
 }
 
-export function formatDateTime(isoString: string): string {
+export function formatDateTime(isoString) {
   try {
     const d = new Date(isoString);
     return d.toLocaleString('en-US', {
@@ -210,7 +189,7 @@ export function formatDateTime(isoString: string): string {
   }
 }
 
-export function formatHour(isoString: string): string {
+export function formatHour(isoString) {
   try {
     const d = new Date(isoString);
     return d.toLocaleTimeString('en-US', {

@@ -1,16 +1,7 @@
 import React from 'react';
-import { TabId } from './NavigationTabs';
-import { AirQualityResponse, MicroProfile } from '../types/airQuality';
 import { ArrowRight, Compass, Sparkles, AlertTriangle, ShieldCheck, HeartPulse, Footprints } from 'lucide-react';
 
-interface NextStepGuideProps {
-  activeTab: TabId;
-  airData: AirQualityResponse | null;
-  microProfile: MicroProfile;
-  onNavigate: (tab: TabId) => void;
-}
-
-export const NextStepGuide: React.FC<NextStepGuideProps> = ({
+export const NextStepGuide = ({
   activeTab,
   airData,
   microProfile,
@@ -22,7 +13,7 @@ export const NextStepGuide: React.FC<NextStepGuideProps> = ({
   const isHighPollution = aqi > 150;
 
   // Compute smart next step based on current tab and AQI severity
-  let targetTab: TabId = 'forecast';
+  let targetTab = 'forecast';
   let title = 'Check Safe Exercise Windows';
   let description = 'Plan your outdoor activities around the cleanest forecasted daylight hours.';
   let buttonLabel = 'Explore 7-Day Forecast';

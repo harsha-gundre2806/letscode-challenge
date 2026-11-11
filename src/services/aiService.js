@@ -1,7 +1,6 @@
-import { AirQualityResponse, MicroProfile } from '../types/airQuality';
 import { getAQICategory } from '../utils/aqiUtils';
 
-export function getEffectiveGeminiApiKey(): string {
+export function getEffectiveGeminiApiKey() {
   if (typeof window !== 'undefined') {
     const localKey = localStorage.getItem('breathe_gemini_api_key');
     if (localKey && localKey.trim()) return localKey.trim();
@@ -9,7 +8,7 @@ export function getEffectiveGeminiApiKey(): string {
   return import.meta.env.VITE_GEMINI_API_KEY || '';
 }
 
-export function setCustomGeminiApiKey(key: string) {
+export function setCustomGeminiApiKey(key) {
   if (typeof window !== 'undefined') {
     if (key.trim()) {
       localStorage.setItem('breathe_gemini_api_key', key.trim());
@@ -19,11 +18,7 @@ export function setCustomGeminiApiKey(key: string) {
   }
 }
 
-export async function askGeminiOrFallback(
-  userQuery: string,
-  airData: AirQualityResponse,
-  profile: MicroProfile
-): Promise<string> {
+export async function askGeminiOrFallback(userQuery, airData, profile) {
   const apiKey = getEffectiveGeminiApiKey();
 
   if (apiKey) {
@@ -74,15 +69,10 @@ Use clear bullet points where appropriate. Do NOT use emojis. Strict markdown fo
     }
   }
 
-  // Built-in intelligent domain fallback
   return generateDomainResponse(userQuery, airData, profile);
 }
 
-function generateDomainResponse(
-  query: string,
-  data: AirQualityResponse,
-  profile: MicroProfile
-): string {
+function generateDomainResponse(query, data, profile) {
   const q = query.toLowerCase();
   const aqi = data.current.us_aqi;
   const pm25 = data.current.pm2_5;

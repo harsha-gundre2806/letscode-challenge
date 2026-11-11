@@ -1,24 +1,14 @@
 import React, { useState } from 'react';
-import { AirQualityResponse, MicroProfile } from '../types/airQuality';
 import { getAQICategory } from '../utils/aqiUtils';
 import { 
   X, 
   Share2, 
   Copy, 
   Check, 
-  Wind, 
-  ShieldCheck,
-  Download
+  Wind 
 } from 'lucide-react';
 
-interface SocialShareModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  airData: AirQualityResponse | null;
-  microProfile: MicroProfile;
-}
-
-export const SocialShareModal: React.FC<SocialShareModalProps> = ({
+export const SocialShareModal = ({
   isOpen,
   onClose,
   airData,
@@ -57,7 +47,7 @@ Monitored via BreatheBetter Air Quality Intelligence Platform (Copernicus CAMS &
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>

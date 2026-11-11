@@ -1,13 +1,4 @@
-import { CommuteExposureResult, HourlyDataPoint } from '../types/airQuality';
-
-export interface CommuteInput {
-  mode: 'walking' | 'cycling' | 'driving' | 'transit';
-  durationMinutes: number;
-  currentPm25: number;
-  forecast?: HourlyDataPoint[];
-}
-
-export function calculatePersonalExposure(input: CommuteInput): CommuteExposureResult {
+export function calculatePersonalExposure(input) {
   const { mode, durationMinutes, currentPm25, forecast } = input;
 
   // Minute ventilation rates (L/min converted to m³/min)
@@ -44,13 +35,13 @@ export function calculatePersonalExposure(input: CommuteInput): CommuteExposureR
   const dailyBenchmarkMicrograms = 225;
   const dailyThresholdPercent = Math.min(999, Math.round((inhaledDoseMicrograms / dailyBenchmarkMicrograms) * 100));
 
-  let riskRating: 'Low' | 'Moderate' | 'Elevated' | 'Severe' = 'Low';
+  let riskRating = 'Low';
   if (dailyThresholdPercent > 70) riskRating = 'Severe';
   else if (dailyThresholdPercent > 40) riskRating = 'Elevated';
   else if (dailyThresholdPercent > 15) riskRating = 'Moderate';
 
   // Find better window from forecast if available
-  let betterWindowRecommendation: string | undefined;
+  let betterWindowRecommendation;
   if (forecast && forecast.length >= 6) {
     const nextHours = forecast.slice(0, 12);
     const sortedByPm25 = [...nextHours].sort((a, b) => a.pm2_5 - b.pm2_5);

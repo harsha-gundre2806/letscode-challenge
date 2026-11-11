@@ -1,33 +1,14 @@
 import React, { useState } from 'react';
-import { LocationInfo } from '../../types/airQuality';
-import { CURATED_CITIES } from '../../services/airQualityService';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
   Trophy, 
   Flame, 
   TreePine, 
-  ArrowRight, 
-  ExternalLink,
-  ShieldCheck,
-  Activity
+  ArrowRight
 } from 'lucide-react';
 
-interface LeaderboardTabProps {
-  onSelectLocation: (loc: LocationInfo) => void;
-  onNavigateToTab: (tab: any) => void;
-}
-
-interface LeaderboardEntry {
-  rank: number;
-  city: string;
-  country: string;
-  aqi: number;
-  pm25: number;
-  coords: { lat: number; lon: number };
-}
-
 // Authentic global leaderboard benchmarks
-const CLEANEST_CITIES: LeaderboardEntry[] = [
+const CLEANEST_CITIES = [
   { rank: 1, city: 'Reykjavik', country: 'Iceland', aqi: 14, pm25: 3.2, coords: { lat: 64.1466, lon: -21.9426 } },
   { rank: 2, city: 'Sydney', country: 'Australia', aqi: 22, pm25: 5.1, coords: { lat: -33.8688, lon: 151.2093 } },
   { rank: 3, city: 'Zurich', country: 'Switzerland', aqi: 26, pm25: 6.4, coords: { lat: 47.3769, lon: 8.5417 } },
@@ -37,7 +18,7 @@ const CLEANEST_CITIES: LeaderboardEntry[] = [
   { rank: 7, city: 'Bengaluru', country: 'India', aqi: 65, pm25: 18.4, coords: { lat: 12.9716, lon: 77.5946 } },
 ];
 
-const MOST_POLLUTED_HOTSPOTS: LeaderboardEntry[] = [
+const MOST_POLLUTED_HOTSPOTS = [
   { rank: 1, city: 'Lahore', country: 'Pakistan', aqi: 310, pm25: 165.2, coords: { lat: 31.5204, lon: 74.3587 } },
   { rank: 2, city: 'New Delhi', country: 'India', aqi: 245, pm25: 112.5, coords: { lat: 28.6139, lon: 77.2090 } },
   { rank: 3, city: 'Cairo', country: 'Egypt', aqi: 182, pm25: 88.0, coords: { lat: 30.0444, lon: 31.2357 } },
@@ -47,15 +28,15 @@ const MOST_POLLUTED_HOTSPOTS: LeaderboardEntry[] = [
   { rank: 7, city: 'Dubai', country: 'United Arab Emirates', aqi: 118, pm25: 41.5, coords: { lat: 25.2048, lon: 55.2708 } },
 ];
 
-export const LeaderboardTab: React.FC<LeaderboardTabProps> = ({
+export const LeaderboardTab = ({
   onSelectLocation,
   onNavigateToTab,
 }) => {
-  const [viewMode, setViewMode] = useState<'clean' | 'polluted'>('clean');
+  const [viewMode, setViewMode] = useState('clean');
 
   const activeList = viewMode === 'clean' ? CLEANEST_CITIES : MOST_POLLUTED_HOTSPOTS;
 
-  const handleInspect = (entry: LeaderboardEntry) => {
+  const handleInspect = (entry) => {
     onSelectLocation({
       name: entry.city,
       country: entry.country,
@@ -86,7 +67,7 @@ export const LeaderboardTab: React.FC<LeaderboardTabProps> = ({
         <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
           <button
             onClick={() => setViewMode('clean')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
               viewMode === 'clean'
                 ? 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
@@ -97,7 +78,7 @@ export const LeaderboardTab: React.FC<LeaderboardTabProps> = ({
           </button>
           <button
             onClick={() => setViewMode('polluted')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
               viewMode === 'polluted'
                 ? 'bg-white dark:bg-slate-900 text-rose-700 dark:text-rose-400'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
