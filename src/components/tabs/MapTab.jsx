@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { reverseGeocode, fetchAirQualityData } from '../../services/airQualityService';
 import { getAQICategory } from '../../utils/aqiUtils';
 import { 
@@ -7,7 +8,10 @@ import {
   Check, 
   Flame,
   TreePine,
-  RefreshCw
+  RefreshCw,
+  Crosshair,
+  X,
+  MapPin
 } from 'lucide-react';
 
 const GLOBAL_BENCHMARK_STATIONS = [
@@ -48,9 +52,12 @@ export const MapTab = ({
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
+      const initialLat = currentLocation?.latitude || 17.3850;
+      const initialLng = currentLocation?.longitude || 78.4867;
+
       const map = L.map(mapContainerRef.current, {
-        center: [currentLocation.latitude, currentLocation.longitude],
-        zoom: 4,
+        center: [initialLat, initialLng],
+        zoom: 5,
         zoomControl: true,
         attributionControl: true,
       });
@@ -60,8 +67,9 @@ export const MapTab = ({
         : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
       const tileLayer = L.tileLayer(tileUrl, {
+        subdomains: 'abcd',
         attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OpenStreetMap',
-        maxZoom: 18,
+        maxZoom: 19,
       }).addTo(map);
 
       tileLayerRef.current = tileLayer;
@@ -69,6 +77,28 @@ export const MapTab = ({
       const markersGroup = L.layerGroup().addTo(map);
       markersLayerRef.current = markersGroup;
       mapInstanceRef.current = map;
+
+      // Staggered size invalidations to ensure proper rendering during React mounting and CSS tab transitions
+      const t1 = setTimeout(() => {
+        if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+      }, 50);
+      const t2 = setTimeout(() => {
+        if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+      }, 200);
+      const t3 = setTimeout(() => {
+        if (mapInstanceRef.current) mapInstanceRef.current.invalidateSize();
+      }, 500);
+
+      // ResizeObserver for rock-solid container sizing
+      let resizeObserver = null;
+      if (typeof ResizeObserver !== 'undefined' && mapContainerRef.current) {
+        resizeObserver = new ResizeObserver(() => {
+          if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+          }
+        });
+        resizeObserver.observe(mapContainerRef.current);
+      }
 
       // Click anywhere on Earth to query authentic air quality
       map.on('click', async (e) => {
@@ -92,32 +122,48 @@ export const MapTab = ({
           setIsFetchingCoord(false);
         }
       });
-    }
 
-    return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
-      }
-    };
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+        }
+      };
+    }
   }, []);
 
   // Update Tile Layer when Dark Mode changes
   useEffect(() => {
-    if (!mapInstanceRef.current || !tileLayerRef.current) return;
-    mapInstanceRef.current.removeLayer(tileLayerRef.current);
+    if (!mapInstanceRef.current) return;
+    if (tileLayerRef.current) {
+      mapInstanceRef.current.removeLayer(tileLayerRef.current);
+    }
 
     const tileUrl = darkMode
       ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
       : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
 
     const newTileLayer = L.tileLayer(tileUrl, {
+      subdomains: 'abcd',
       attribution: '&copy; CARTO &copy; OpenStreetMap',
-      maxZoom: 18,
+      maxZoom: 19,
     }).addTo(mapInstanceRef.current);
 
     tileLayerRef.current = newTileLayer;
   }, [darkMode]);
+
+  // Recenter map when currentLocation changes
+  useEffect(() => {
+    if (mapInstanceRef.current && currentLocation) {
+      mapInstanceRef.current.invalidateSize();
+    }
+  }, [currentLocation]);
 
   // Update Markers
   useEffect(() => {
@@ -125,38 +171,69 @@ export const MapTab = ({
 
     markersLayerRef.current.clearLayers();
 
-    GLOBAL_BENCHMARK_STATIONS.forEach(station => {
-      const cat = getAQICategory(station.aqi);
+    // Combine benchmark stations with active user location
+    const stations = [...GLOBAL_BENCHMARK_STATIONS];
+    const isCurrentInBenchmark = stations.some(
+      s => Math.abs(s.location.latitude - currentLocation.latitude) < 0.1 &&
+           Math.abs(s.location.longitude - currentLocation.longitude) < 0.1
+    );
+
+    // If currentLocation is not already in the benchmark stations, add it as a prominent active marker
+    if (!isCurrentInBenchmark && currentLocation) {
+      stations.unshift({
+        location: currentLocation,
+        aqi: null, // marked as active target
+        pm25: null,
+        isCurrentLocation: true,
+        isHotspot: false,
+        isCleanPocket: false,
+      });
+    }
+
+    stations.forEach(station => {
+      const isCurrent = station.isCurrentLocation || (
+        Math.abs(station.location.latitude - currentLocation.latitude) < 0.1 &&
+        Math.abs(station.location.longitude - currentLocation.longitude) < 0.1
+      );
+
+      const cat = station.aqi !== null ? getAQICategory(station.aqi) : { accentColor: '#10B981', label: 'Active Location' };
+
+      const displayText = station.aqi !== null
+        ? (activePollutantLayer === 'aqi' ? station.aqi : Math.round(station.pm25))
+        : 'YOU';
 
       const html = `
         <div style="
+          position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 32px;
-          height: 32px;
+          width: ${isCurrent ? '38px' : '32px'};
+          height: ${isCurrent ? '38px' : '32px'};
           border-radius: 50%;
           background-color: ${cat.accentColor};
           color: white;
           font-weight: 700;
-          font-size: 11px;
+          font-size: ${isCurrent ? '10px' : '11px'};
           font-family: monospace;
-          border: 2px solid ${darkMode ? '#0F172A' : '#FFFFFF'};
+          border: ${isCurrent ? '3px solid #3B82F6' : `2px solid ${darkMode ? '#0F172A' : '#FFFFFF'}`};
           cursor: pointer;
         ">
-          ${activePollutantLayer === 'aqi' ? station.aqi : Math.round(station.pm25)}
+          ${isCurrent ? `<span style="position: absolute; top: -6px; right: -6px; width: 10px; height: 10px; border-radius: 50%; background-color: #3B82F6; border: 1.5px solid white;"></span>` : ''}
+          ${displayText}
         </div>
       `;
 
       const customIcon = L.divIcon({
         className: 'custom-aqi-pin',
         html,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        iconSize: isCurrent ? [38, 38] : [32, 32],
+        iconAnchor: isCurrent ? [19, 19] : [16, 16],
       });
 
       const marker = L.marker([station.location.latitude, station.location.longitude], {
         icon: customIcon,
+        zIndexOffset: isCurrent ? 1000 : 100,
       });
 
       marker.on('click', () => {
@@ -165,11 +242,20 @@ export const MapTab = ({
 
       markersLayerRef.current?.addLayer(marker);
     });
-  }, [activePollutantLayer, selectedStation, darkMode]);
+  }, [activePollutantLayer, selectedStation, darkMode, currentLocation]);
 
   const handleSelectAsActive = (station) => {
     onSelectLocation(station.location);
     onNavigateToTab('dashboard');
+  };
+
+  const handleRecenter = () => {
+    if (mapInstanceRef.current && currentLocation) {
+      mapInstanceRef.current.flyTo([currentLocation.latitude, currentLocation.longitude], 9, {
+        duration: 1.2
+      });
+      mapInstanceRef.current.invalidateSize();
+    }
   };
 
   return (
@@ -177,39 +263,56 @@ export const MapTab = ({
       
       {/* Top Map Control Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
-            Interactive Pollution Layer:
-          </span>
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setActivePollutantLayer('aqi')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
-                activePollutantLayer === 'aqi'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              US AQI
-            </button>
-            <button
-              onClick={() => setActivePollutantLayer('pm25')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
-                activePollutantLayer === 'pm25'
-                  ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              PM2.5 (µg/m³)
-            </button>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+              Layer:
+            </span>
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
+              <button
+                onClick={() => setActivePollutantLayer('aqi')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                  activePollutantLayer === 'aqi'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                US AQI
+              </button>
+              <button
+                onClick={() => setActivePollutantLayer('pm25')}
+                className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
+                  activePollutantLayer === 'pm25'
+                    ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                PM2.5 (µg/m³)
+              </button>
+            </div>
           </div>
+
+          {/* Quick Recenter on Current Active Location */}
+          <button
+            onClick={handleRecenter}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+            title="Fly map directly to your active city/coordinates"
+          >
+            <Crosshair className="w-3.5 h-3.5 text-blue-500" />
+            <span>Center on {currentLocation?.name || 'My Location'}</span>
+          </button>
         </div>
 
+        {/* Legend */}
         <div className="flex items-center gap-3 text-xs">
           <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+            <span className="text-slate-600 dark:text-slate-400 font-semibold">Active Location</span>
+          </div>
+          <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <span className="text-slate-600 dark:text-slate-400">Clean Pocket (&lt;50)</span>
+            <span className="text-slate-600 dark:text-slate-400">Clean (&le;50)</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
@@ -223,18 +326,23 @@ export const MapTab = ({
       </div>
 
       {/* Main Map Container & Inspector Overlay */}
-      <div className="relative w-full h-[580px] bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+      <div className="relative w-full h-[600px] min-h-[600px] bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
         
-        <div ref={mapContainerRef} className="w-full h-full" />
+        <div 
+          ref={mapContainerRef} 
+          className="w-full h-full min-h-[600px]" 
+          style={{ width: '100%', height: '100%', minHeight: '600px', position: 'relative' }} 
+        />
 
         {/* Click Instruction Badge */}
-        <div className="absolute top-4 left-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 pointer-events-none">
-          Click any coordinate on Earth to query authentic atmospheric data
+        <div className="absolute top-4 left-4 z-[400] bg-white/95 dark:bg-slate-900/95 backdrop-blur-xs border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-600 dark:text-slate-300 pointer-events-none flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Click any coordinate on Earth to query authentic atmospheric data</span>
         </div>
 
         {/* Loading Indicator */}
         {isFetchingCoord && (
-          <div className="absolute top-4 right-4 z-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+          <div className="absolute top-4 right-4 z-[400] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             <span>Fetching Coordinate AQI...</span>
           </div>
@@ -242,7 +350,7 @@ export const MapTab = ({
 
         {/* Station Inspector Floating Drawer */}
         {selectedStation && (
-          <div className="absolute bottom-4 right-4 z-20 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+          <div className="absolute bottom-4 right-4 z-[400] w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
             <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
               <div>
                 <h3 className="font-bold text-sm text-slate-900 dark:text-white">
@@ -252,25 +360,44 @@ export const MapTab = ({
                   {selectedStation.location.country}
                 </span>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
-                  {selectedStation.aqi}
-                </span>
-                <span className="text-[10px] text-slate-400 uppercase block font-semibold">
-                  US AQI
-                </span>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
+                    {selectedStation.aqi ?? 'Live'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 uppercase block font-semibold">
+                    {selectedStation.aqi !== null ? 'US AQI' : 'Target'}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setSelectedStation(null)}
+                  className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Close station details"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
             </div>
 
             <div className="py-2.5 space-y-1.5 text-xs">
+              {selectedStation.pm25 !== null && (
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                  <span>PM2.5 Concentration:</span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedStation.pm25} µg/m³</span>
+                </div>
+              )}
+              {selectedStation.aqi !== null && (
+                <div className="flex justify-between text-slate-600 dark:text-slate-400">
+                  <span>Category:</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    {getAQICategory(selectedStation.aqi).label}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>PM2.5 Concentration:</span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">{selectedStation.pm25} µg/m³</span>
-              </div>
-              <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                <span>Category:</span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  {getAQICategory(selectedStation.aqi).label}
+                <span>Coordinates:</span>
+                <span className="font-mono text-slate-700 dark:text-slate-300">
+                  {selectedStation.location.latitude?.toFixed(3)}&deg;, {selectedStation.location.longitude?.toFixed(3)}&deg;
                 </span>
               </div>
               <div className="flex justify-between text-slate-600 dark:text-slate-400">
