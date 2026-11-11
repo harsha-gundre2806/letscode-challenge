@@ -75,7 +75,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           
           {/* Outdoor Running / Jogging */}
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
             <span className="font-bold text-slate-900 dark:text-white block mb-1">
               Outdoor Running & Sports
             </span>
@@ -90,13 +90,13 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                 {aqi > 150 ? 'Strictly Prohibited' : aqi > 100 ? 'Limit to Low Exertion' : 'Safe to Exercise'}
               </span>
             </div>
-            <p className="text-slate-500 mt-2">
+            <p className="text-slate-600 dark:text-slate-300 mt-2">
               High tidal breathing draws unfiltered particulate matter straight into bronchial airways.
             </p>
           </div>
 
           {/* Cycling & Commuting */}
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
             <span className="font-bold text-slate-900 dark:text-white block mb-1">
               Cycling & Road Transit
             </span>
@@ -111,13 +111,13 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                 {aqi > 150 ? 'Wear N95 Mask' : aqi > 100 ? 'Use Shielded Routes' : 'Safe & Recommended'}
               </span>
             </div>
-            <p className="text-slate-500 mt-2">
+            <p className="text-slate-600 dark:text-slate-300 mt-2">
               Cyclists inhale ~2.5x more air per minute than pedestrians. Prefer shielded paths.
             </p>
           </div>
 
           {/* Children Playground Play */}
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
             <span className="font-bold text-slate-900 dark:text-white block mb-1">
               Children & Playground Play
             </span>
@@ -132,13 +132,13 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                 {aqi > 120 ? 'Indoor Play Only' : aqi > 80 ? 'Limit After-School Sports' : 'Safe for Play'}
               </span>
             </div>
-            <p className="text-slate-500 mt-2">
+            <p className="text-slate-600 dark:text-slate-300 mt-2">
               Pediatric lungs are still developing; particulate exposure causes chronic respiratory deficits.
             </p>
           </div>
 
           {/* Window Airing & Ventilation */}
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
             <span className="font-bold text-slate-900 dark:text-white block mb-1">
               Home Airing & Ventilation
             </span>
@@ -153,7 +153,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                 {aqi > 120 ? 'Keep Windows Closed' : aqi > 90 ? 'Ventilate Mid-Day Only' : 'Safe to Air Out Rooms'}
               </span>
             </div>
-            <p className="text-slate-500 mt-2">
+            <p className="text-slate-600 dark:text-slate-300 mt-2">
               Opening windows during smog spikes rapidly saturates indoor air with fine soot.
             </p>
           </div>
@@ -171,29 +171,29 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs leading-relaxed">
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 space-y-2">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm text-slate-900 dark:text-white">PM10 (Inhalable Coarse Particles)</span>
-              <span className="font-mono text-slate-400">&lt; 10 Microns</span>
+              <span className="font-mono text-slate-500 dark:text-slate-400">&lt; 10 Microns</span>
             </div>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-slate-600 dark:text-slate-300">
               Coarse dust, pollen, and mechanical debris. These particles are largely captured in the upper respiratory tract, nasal passages, and trachea. 
             </p>
-            <p className="text-slate-600 dark:text-slate-400">
-              <strong className="text-slate-800 dark:text-slate-200">Symptoms:</strong> Nasal congestion, throat irritation, dry cough, and conjunctivitis (burning eyes). Less likely to penetrate systemic circulation directly.
+            <p className="text-slate-600 dark:text-slate-300">
+              <strong className="text-slate-900 dark:text-slate-100">Symptoms:</strong> Nasal congestion, throat irritation, dry cough, and conjunctivitis (burning eyes). Less likely to penetrate systemic circulation directly.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 space-y-2">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-sm text-slate-900 dark:text-white">PM2.5 (Fine Combustion Particles)</span>
-              <span className="font-mono text-slate-400">&lt; 2.5 Microns (1/30th hair width)</span>
+              <span className="font-mono text-slate-500 dark:text-slate-400">&lt; 2.5 Microns (1/30th hair width)</span>
             </div>
-            <p className="text-slate-600 dark:text-slate-400">
+            <p className="text-slate-600 dark:text-slate-300">
               Ultrafine combustion exhaust and chemical condensates. Small enough to bypass all natural cilia filters and settle directly into the alveoli (deep lung air sacs).
             </p>
-            <p className="text-slate-600 dark:text-slate-400">
-              <strong className="text-slate-800 dark:text-slate-200">Systemic Impact:</strong> Diffuses directly across the alveolar-capillary membrane into the bloodstream, triggering vascular oxidative stress, arterial plaque instability, blood clotting, and elevated stroke risks.
+            <p className="text-slate-600 dark:text-slate-300">
+              <strong className="text-slate-900 dark:text-slate-100">Systemic Impact:</strong> Diffuses directly across the alveolar-capillary membrane into the bloodstream, triggering vascular oxidative stress, arterial plaque instability, blood clotting, and elevated stroke risks.
             </p>
           </div>
         </div>
@@ -216,27 +216,27 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                 <span>N95 / FFP2 / KN95 Respirators</span>
                 <span className="text-emerald-600 font-mono">95%+ PM2.5 Filtration</span>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-slate-600 dark:text-slate-300 mt-1">
                 Electrostatic meltblown fabric creates a tight physical facial seal. The gold standard for ambient pollution protection.
               </p>
             </div>
 
-            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
               <div className="flex justify-between font-bold text-slate-900 dark:text-white">
                 <span>Surgical 3-Ply Masks</span>
                 <span className="text-amber-600 font-mono">~30-40% PM2.5 Filtration</span>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-slate-600 dark:text-slate-300 mt-1">
                 Loose facial fit allows fine aerosols to bypass the perimeter. Only blocks large dust droplets.
               </p>
             </div>
 
-            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
               <div className="flex justify-between font-bold text-slate-900 dark:text-white">
                 <span>Cloth & Bandana Masks</span>
                 <span className="text-rose-600 font-mono">&lt; 15% PM2.5 Filtration</span>
               </div>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-slate-600 dark:text-slate-300 mt-1">
                 Weave pore size (100–200 microns) is far too large to obstruct microscopic PM2.5 soot.
               </p>
             </div>
@@ -251,22 +251,22 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
               Indoor Air Purifier Protocols
             </h3>
           </div>
-          <div className="space-y-2.5 text-slate-600 dark:text-slate-400">
-            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+          <div className="space-y-2.5 text-slate-600 dark:text-slate-300">
+            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
               <span className="font-bold text-slate-900 dark:text-white block">True HEPA (H13 or H14 Grade)</span>
               <p className="mt-1">
                 Captures 99.97% of particulates down to 0.3 microns. Avoid purifiers that rely solely on ionizers (which can produce harmful ozone).
               </p>
             </div>
 
-            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
               <span className="font-bold text-slate-900 dark:text-white block">CADR (Clean Air Delivery Rate)</span>
               <p className="mt-1">
                 Ensure your purifier's CADR rating can exchange the entire room air volume at least 4 to 5 times per hour during severe smog days.
               </p>
             </div>
 
-            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850">
+            <div className="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800">
               <span className="font-bold text-slate-900 dark:text-white block">Activated Carbon Stage</span>
               <p className="mt-1">
                 Adsorbs hazardous gaseous VOCs, formaldehyde, and nitrogen dioxide (NO2) that physical HEPA fibers cannot capture.
@@ -285,7 +285,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase">
                 <th className="py-2.5 px-3">AQI Range</th>
                 <th className="py-2.5 px-3">Severity Category</th>
                 <th className="py-2.5 px-3">General Population Guidance</th>
@@ -294,7 +294,7 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {AQI_LEVELS.map(level => (
-                <tr key={level.category} className="hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors">
+                <tr key={level.category} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
                   <td className="py-3 px-3 font-mono font-bold text-slate-900 dark:text-white">
                     {level.min} – {level.max === 999 ? '500+' : level.max}
                   </td>
@@ -303,10 +303,10 @@ export const HealthCenterTab: React.FC<HealthCenterTabProps> = ({
                       {level.label}
                     </span>
                   </td>
-                  <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
+                  <td className="py-3 px-3 text-slate-700 dark:text-slate-300">
                     {level.generalHealthAdvisory}
                   </td>
-                  <td className="py-3 px-3 text-slate-500">
+                  <td className="py-3 px-3 text-slate-600 dark:text-slate-300">
                     {level.description}
                   </td>
                 </tr>

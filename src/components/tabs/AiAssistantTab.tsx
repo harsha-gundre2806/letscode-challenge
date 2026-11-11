@@ -169,13 +169,13 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
               <div className={`p-4 rounded-2xl text-xs space-y-2 border ${
                 msg.sender === 'user'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent rounded-tr-xs'
-                  : 'bg-slate-50 dark:bg-slate-850 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-800 rounded-tl-xs'
+                  : 'bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 rounded-tl-xs'
               }`}>
                 <div className="whitespace-pre-line leading-relaxed">
                   {msg.text}
                 </div>
 
-                <div className="flex items-center justify-between pt-1 text-[10px] opacity-70">
+                <div className="flex items-center justify-between pt-1 text-[10px] text-slate-500 dark:text-slate-400">
                   <span>{msg.timestamp}</span>
                   {msg.sender === 'ai' && (
                     <button
@@ -206,10 +206,10 @@ How can I help you navigate today's air conditions? You can ask about outdoor ex
               <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center shrink-0">
                 <Bot className="w-4 h-4" />
               </div>
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 text-xs text-slate-400 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce" />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.2s]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0.4s]" />
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.2s]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:0.4s]" />
                 <span className="ml-1 text-[11px]">BreatheAI is analyzing atmospheric conditions...</span>
               </div>
             </div>

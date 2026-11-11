@@ -123,7 +123,7 @@ export const LeaderboardTab: React.FC<LeaderboardTabProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 uppercase">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase">
                 <th className="py-3 px-6">Rank</th>
                 <th className="py-3 px-4">Location</th>
                 <th className="py-3 px-4">US AQI</th>
@@ -136,15 +136,15 @@ export const LeaderboardTab: React.FC<LeaderboardTabProps> = ({
               {activeList.map(entry => {
                 const cat = getAQICategory(entry.aqi);
                 return (
-                  <tr key={entry.city} className="hover:bg-slate-50 dark:hover:bg-slate-850 transition-colors">
-                    <td className="py-3.5 px-6 font-mono font-bold text-slate-400">
+                  <tr key={entry.city} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <td className="py-3.5 px-6 font-mono font-bold text-slate-500 dark:text-slate-400">
                       #{entry.rank}
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="font-bold text-slate-900 dark:text-white">
                         {entry.city}
                       </div>
-                      <div className="text-[11px] text-slate-400">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400">
                         {entry.country}
                       </div>
                     </td>

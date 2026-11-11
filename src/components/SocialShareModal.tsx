@@ -65,7 +65,7 @@ Monitored via BreatheBetter Air Quality Intelligence Platform (Copernicus CAMS &
 
         {/* Card Preview */}
         <div className="p-5">
-          <div className="border border-slate-300 dark:border-slate-700 rounded-xl p-5 bg-slate-50 dark:bg-slate-850 space-y-4">
+          <div className="border border-slate-300 dark:border-slate-700 rounded-xl p-5 bg-slate-50 dark:bg-slate-800 space-y-4">
             
             {/* Top Bar */}
             <div className="flex items-center justify-between">

@@ -28,9 +28,10 @@ import {
 interface ForecastTabProps {
   airData: AirQualityResponse;
   onNavigateToTab: (tab: any) => void;
+  darkMode?: boolean;
 }
 
-export const ForecastTab: React.FC<ForecastTabProps> = ({ airData, onNavigateToTab }) => {
+export const ForecastTab: React.FC<ForecastTabProps> = ({ airData, onNavigateToTab, darkMode = false }) => {
   // Calculate Aero-Predictive Safe Window
   const safeWindow = useMemo(() => {
     return calculateAeroSafeWindow(airData.forecast);
@@ -184,7 +185,7 @@ export const ForecastTab: React.FC<ForecastTabProps> = ({ airData, onNavigateToT
               72-Hour Continuous Aerosol Model
             </h2>
           </div>
-          <span className="text-xs text-slate-500 font-mono">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
             Hourly Resolution • Copernicus CAMS Model
           </span>
         </div>
@@ -192,19 +193,20 @@ export const ForecastTab: React.FC<ForecastTabProps> = ({ airData, onNavigateToT
         <div className="w-full h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={hourlyChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.6} />
-              <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="#94A3B8" />
-              <YAxis tick={{ fontSize: 10 }} stroke="#94A3B8" />
+              <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#334155' : '#E2E8F0'} opacity={0.6} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
+              <YAxis tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#0F172A', 
-                  border: '1px solid #1E293B', 
+                  backgroundColor: darkMode ? '#0F172A' : '#FFFFFF', 
+                  border: darkMode ? '1px solid #334155' : '1px solid #CBD5E1', 
                   borderRadius: '8px', 
                   fontSize: '11px',
-                  color: '#F8FAFC' 
+                  color: darkMode ? '#F8FAFC' : '#0F172A' 
                 }} 
+                itemStyle={{ color: darkMode ? '#F8FAFC' : '#0F172A' }}
               />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px', color: darkMode ? '#CBD5E1' : '#334155' }} />
               <Line 
                 type="monotone" 
                 dataKey="us_aqi" 

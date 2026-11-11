@@ -225,7 +225,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {showProfileMenu && (
               <div className="absolute right-0 top-full mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 z-50">
-                <div className="px-2 py-1 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                <div className="px-2 py-1 text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Vulnerable Group Guard
                 </div>
                 {PROFILES.map(p => (

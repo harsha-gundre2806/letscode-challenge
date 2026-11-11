@@ -144,7 +144,7 @@ export const NextStepGuide: React.FC<NextStepGuideProps> = ({
                   {title}
                 </h2>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
                 {description}
               </p>
             </div>

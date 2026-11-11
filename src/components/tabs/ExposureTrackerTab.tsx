@@ -91,14 +91,14 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
                     className={`text-left p-3.5 rounded-xl border transition-all cursor-pointer ${
                       isSelected
                         ? 'border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100 ring-1 ring-emerald-500'
-                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+                        : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
                     }`}
                   >
                     <div className="flex items-center gap-2 font-semibold text-xs">
                       <Icon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       <span>{m.label}</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-snug">
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-snug">
                       {m.desc}
                     </p>
                   </button>
@@ -126,7 +126,7 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
               onChange={e => setDurationMinutes(Number(e.target.value))}
               className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-600"
             />
-            <div className="flex justify-between text-[10px] text-slate-400 font-mono mt-1">
+            <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-1">
               <span>5 mins</span>
               <span>30 mins</span>
               <span>60 mins</span>
@@ -161,22 +161,22 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
         {/* Right Output Dossier (1 Col) */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-3 border-b border-slate-100 dark:border-slate-800 pb-2">
               Calculated Inhalation Dosage
             </span>
 
             {/* Inhaled PM2.5 Micrograms */}
-            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 space-y-2">
-              <span className="text-[11px] text-slate-500 font-semibold uppercase block">
+            <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 space-y-2">
+              <span className="text-[11px] text-slate-600 dark:text-slate-400 font-semibold uppercase block">
                 Estimated Inhaled PM2.5 Dose:
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-extrabold font-mono text-slate-900 dark:text-white">
                   {singleTripResult.inhaledDoseMicrograms}
                 </span>
-                <span className="text-xs text-slate-500 font-bold">µg per trip</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400 font-bold">µg per trip</span>
               </div>
-              <div className="text-[11px] text-slate-500 border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between">
+              <div className="text-[11px] text-slate-600 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-2 flex justify-between">
                 <span>Daily Total ({tripsCount} trips):</span>
                 <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{totalDailyDose} µg</span>
               </div>
@@ -185,9 +185,9 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
             {/* Threshold & Risk Gauge */}
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-xs">
-                <span className="text-slate-500">WHO Daily Particulate Benchmark:</span>
+                <span className="text-slate-600 dark:text-slate-400">WHO Daily Particulate Benchmark:</span>
                 <span className={`font-mono font-bold ${
-                  totalDailyThresholdPercent > 70 ? 'text-rose-600' : totalDailyThresholdPercent > 40 ? 'text-amber-600' : 'text-emerald-600'
+                  totalDailyThresholdPercent > 70 ? 'text-rose-600 dark:text-rose-400' : totalDailyThresholdPercent > 40 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
                 }`}>
                   {totalDailyThresholdPercent}% Consumed
                 </span>
@@ -200,19 +200,19 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
                   style={{ width: `${Math.min(100, totalDailyThresholdPercent)}%` }}
                 />
               </div>
-              <span className="text-[10px] text-slate-400 block">
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
                 Benchmark: 225 µg (based on 15 µg/m³ WHO ceiling over 15 m³ daily air intake).
               </span>
             </div>
 
             {/* Biological Rationale */}
-            <div className="mt-4 text-xs text-slate-600 dark:text-slate-400 space-y-1">
+            <div className="mt-4 text-xs text-slate-600 dark:text-slate-300 space-y-1">
               <div className="flex justify-between">
-                <span>Minute Ventilation:</span>
+                <span className="text-slate-600 dark:text-slate-400">Minute Ventilation:</span>
                 <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{singleTripResult.ventilationRateLpm} L/min</span>
               </div>
               <div className="flex justify-between">
-                <span>Mode Filtration Factor:</span>
+                <span className="text-slate-600 dark:text-slate-400">Mode Filtration Factor:</span>
                 <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{singleTripResult.filtrationEfficiency}% filtered</span>
               </div>
             </div>
@@ -230,7 +230,7 @@ export const ExposureTrackerTab: React.FC<ExposureTrackerTabProps> = ({
               </p>
             </div>
           ) : (
-            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-850 text-xs text-slate-500">
+            <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
               Current ambient conditions are uniform across upcoming travel hours.
             </div>
           )}

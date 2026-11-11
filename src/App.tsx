@@ -188,6 +188,7 @@ export const App: React.FC = () => {
               <HistoryTab
                 airData={airData}
                 onNavigateToTab={setActiveTab}
+                darkMode={darkMode}
               />
             )}
 
@@ -195,6 +196,7 @@ export const App: React.FC = () => {
               <ForecastTab
                 airData={airData}
                 onNavigateToTab={setActiveTab}
+                darkMode={darkMode}
               />
             )}
 
@@ -203,6 +205,7 @@ export const App: React.FC = () => {
                 currentLocation={currentLocation}
                 currentAirData={airData}
                 onNavigateToTab={setActiveTab}
+                darkMode={darkMode}
               />
             )}
 
@@ -226,6 +229,7 @@ export const App: React.FC = () => {
               <SimulatorTab
                 airData={airData}
                 onNavigateToTab={setActiveTab}
+                darkMode={darkMode}
               />
             )}
 

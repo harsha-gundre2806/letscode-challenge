@@ -27,11 +27,13 @@ import {
 interface SimulatorTabProps {
   airData: AirQualityResponse;
   onNavigateToTab: (tab: any) => void;
+  darkMode?: boolean;
 }
 
 export const SimulatorTab: React.FC<SimulatorTabProps> = ({
   airData,
   onNavigateToTab,
+  darkMode = false,
 }) => {
   const [params, setParams] = useState<WhatIfParams>({
     trafficReduction: 30,
@@ -255,7 +257,7 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
         {/* Projected Outcome Card (1 Col) */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block border-b border-slate-100 dark:border-slate-800 pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block border-b border-slate-100 dark:border-slate-800 pb-2">
               Projected 48h Outcome
             </span>
 
@@ -273,22 +275,22 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
             </div>
 
             {/* Shift in Severity Category */}
-            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 space-y-2 text-xs">
+            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-slate-500">Current Forecast Tier:</span>
+                <span className="text-slate-600 dark:text-slate-400">Current Forecast Tier:</span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {getAQICategory(airData.current.us_aqi).label}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Projected Policy Tier:</span>
+                <span className="text-slate-600 dark:text-slate-400">Projected Policy Tier:</span>
                 <span className="font-bold text-emerald-600 dark:text-emerald-400">
                   {simulationResult.projectedCategory}
                 </span>
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               Based on urban aerosol source-apportionment models (35% transport fraction, 30% industrial/construction, 15% green biological uptake).
             </p>
           </div>
@@ -312,7 +314,7 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
               48-Hour Continuous Simulation Curve (Baseline vs Simulated PM2.5)
             </h2>
           </div>
-          <span className="text-xs font-mono text-slate-400">
+          <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
             Units: PM2.5 (µg/m³)
           </span>
         </div>
@@ -320,19 +322,20 @@ export const SimulatorTab: React.FC<SimulatorTabProps> = ({
         <div className="w-full h-72">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.6} />
-              <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="#94A3B8" />
-              <YAxis tick={{ fontSize: 10 }} stroke="#94A3B8" />
+              <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#334155' : '#E2E8F0'} opacity={0.6} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
+              <YAxis tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#0F172A', 
-                  border: '1px solid #1E293B', 
+                  backgroundColor: darkMode ? '#0F172A' : '#FFFFFF', 
+                  border: darkMode ? '1px solid #334155' : '1px solid #CBD5E1', 
                   borderRadius: '8px', 
                   fontSize: '11px',
-                  color: '#F8FAFC' 
+                  color: darkMode ? '#F8FAFC' : '#0F172A' 
                 }} 
+                itemStyle={{ color: darkMode ? '#F8FAFC' : '#0F172A' }}
               />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px', color: darkMode ? '#CBD5E1' : '#334155' }} />
               <Line 
                 type="monotone" 
                 dataKey="baseline" 

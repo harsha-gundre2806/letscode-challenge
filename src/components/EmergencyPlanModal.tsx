@@ -74,7 +74,7 @@ export const EmergencyPlanModal: React.FC<EmergencyPlanModalProps> = ({
         <div className="p-6 space-y-6 overflow-y-auto print:p-0">
           
           {/* Official Document Banner */}
-          <div className="border border-slate-300 dark:border-slate-700 rounded-xl p-4 bg-slate-50 dark:bg-slate-850">
+          <div className="border border-slate-300 dark:border-slate-700 rounded-xl p-4 bg-slate-50 dark:bg-slate-800">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
               <div>
                 <div className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">

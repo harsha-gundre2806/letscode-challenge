@@ -27,11 +27,13 @@ interface ComparisonTabProps {
   currentLocation: LocationInfo;
   currentAirData: AirQualityResponse;
   onNavigateToTab: (tab: any) => void;
+  darkMode?: boolean;
 }
 
 export const ComparisonTab: React.FC<ComparisonTabProps> = ({
   currentLocation,
   currentAirData,
+  darkMode = false,
 }) => {
   // Cities to compare: default to active city + 2 benchmarks (e.g. New Delhi, Bengaluru, London)
   const [comparedCities, setComparedCities] = useState<LocationInfo[]>([
@@ -204,12 +206,12 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
                     <h3 className="font-bold text-base text-slate-900 dark:text-white">
                       {data.location.name}
                     </h3>
-                    <span className="text-xs text-slate-400">{data.location.country}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{data.location.country}</span>
                   </div>
                   {comparedCities.length > 1 && (
                     <button
                       onClick={() => handleRemoveCity(data.location.name)}
-                      className="p-1 text-slate-400 hover:text-rose-500 rounded transition-colors"
+                      className="p-1 text-slate-400 hover:text-rose-500 rounded transition-colors cursor-pointer"
                       title="Remove from comparison"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -218,7 +220,7 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
                 </div>
 
                 <div className="py-4">
-                  <span className="text-xs text-slate-400 font-semibold block uppercase">US AQI</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold block uppercase">US AQI</span>
                   <div className="flex items-baseline gap-2 mt-0.5">
                     <span className="text-4xl font-black font-mono text-slate-900 dark:text-white">
                       {aqi}
@@ -232,25 +234,25 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
                 {/* Pollutant Breakdown Table */}
                 <div className="space-y-2 text-xs border-t border-slate-100 dark:border-slate-800 pt-3">
                   <div className="flex justify-between">
-                    <span className="text-slate-500">PM2.5:</span>
+                    <span className="text-slate-600 dark:text-slate-400">PM2.5:</span>
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{data.current.pm2_5} µg/m³</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">PM10:</span>
+                    <span className="text-slate-600 dark:text-slate-400">PM10:</span>
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{data.current.pm10} µg/m³</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">NO2:</span>
+                    <span className="text-slate-600 dark:text-slate-400">NO2:</span>
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{data.current.nitrogen_dioxide} µg/m³</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Ozone (O3):</span>
+                    <span className="text-slate-600 dark:text-slate-400">Ozone (O3):</span>
                     <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{data.current.ozone} µg/m³</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500">
+              <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
                 EU AQI: <span className="font-semibold text-slate-700 dark:text-slate-300">{data.current.european_aqi}</span> • Latency: {data.dataSource.latencyMs}ms
               </div>
             </div>
@@ -270,19 +272,20 @@ export const ComparisonTab: React.FC<ComparisonTabProps> = ({
         <div className="w-full h-80">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={barChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.6} />
-              <XAxis dataKey="metric" tick={{ fontSize: 11 }} stroke="#94A3B8" />
-              <YAxis tick={{ fontSize: 10 }} stroke="#94A3B8" />
+              <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#334155' : '#E2E8F0'} opacity={0.6} />
+              <XAxis dataKey="metric" tick={{ fontSize: 11, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
+              <YAxis tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#0F172A', 
-                  border: '1px solid #1E293B', 
+                  backgroundColor: darkMode ? '#0F172A' : '#FFFFFF', 
+                  border: darkMode ? '1px solid #334155' : '1px solid #CBD5E1', 
                   borderRadius: '8px', 
                   fontSize: '11px',
-                  color: '#F8FAFC' 
+                  color: darkMode ? '#F8FAFC' : '#0F172A' 
                 }} 
+                itemStyle={{ color: darkMode ? '#F8FAFC' : '#0F172A' }}
               />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px', color: darkMode ? '#CBD5E1' : '#334155' }} />
               {validDataList.map((d, idx) => (
                 <Bar 
                   key={d.location.name}

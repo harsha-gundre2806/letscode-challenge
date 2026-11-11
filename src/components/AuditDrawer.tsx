@@ -102,14 +102,14 @@ export const AuditDrawer: React.FC<AuditDrawerProps> = ({
           </div>
 
           {/* API Key Credentials Configuration */}
-          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 space-y-3">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 space-y-3">
             <div className="flex items-center gap-2">
               <Key className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
                 API Key Credentials Configuration
               </span>
             </div>
-            <p className="text-xs text-slate-500 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
               Open-Meteo, Copernicus, and OpenStreetMap operate freely with zero API keys required. You can optionally configure your Google Gemini API key below or in your <code className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono text-[11px]">.env</code> file for generative responses in BreatheAI Assistant.
             </p>
 

@@ -28,9 +28,10 @@ import {
 interface HistoryTabProps {
   airData: AirQualityResponse;
   onNavigateToTab: (tab: any) => void;
+  darkMode?: boolean;
 }
 
-export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab }) => {
+export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab, darkMode = false }) => {
   const [selectedMetric, setSelectedMetric] = useState<'both' | 'pm25' | 'pm10' | 'aqi'>('both');
   const [historyRangeDays, setHistoryRangeDays] = useState<3 | 7>(7);
 
@@ -94,7 +95,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
               Historical Pollution Tracker & Chronological Trends
             </h1>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
             Analyzing 7-day verified retrospective atmospheric records for {airData.location.name}
           </p>
         </div>
@@ -103,20 +104,20 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
         <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
           <button
             onClick={() => setHistoryRangeDays(3)}
-            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
               historyRangeDays === 3
                 ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Past 3 Days
           </button>
           <button
             onClick={() => setHistoryRangeDays(7)}
-            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
               historyRangeDays === 7
                 ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Past 7 Days
@@ -129,7 +130,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
         
         {/* Trend Direction */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider block">
             24h Atmospheric Trajectory
           </span>
           <div className="mt-2 flex items-center gap-2">
@@ -146,7 +147,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
               <div className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
                 {percentChange}% {isWorsened ? 'Increase' : 'Improvement'}
               </div>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-slate-600 dark:text-slate-300">
                 {isWorsened ? 'Particulate density has surged' : 'Cleaner air compared to previous 24h'}
               </span>
             </div>
@@ -155,32 +156,32 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
 
         {/* Current 24h Average PM2.5 */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider block">
             Recent 24h Mean PM2.5
           </span>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
               {currentAvgPm25}
             </span>
-            <span className="text-xs text-slate-500">µg/m³</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">µg/m³</span>
           </div>
-          <span className="text-[11px] text-slate-500 mt-1 block">
+          <span className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 block">
             WHO Safe Cap: 15 µg/m³ ({Math.round((currentAvgPm25 / 15) * 100)}% of limit)
           </span>
         </div>
 
         {/* Prior 24h Average PM2.5 */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
-          <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider block">
             Prior 24h Baseline PM2.5
           </span>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold font-mono text-slate-900 dark:text-white">
               {prevAvgPm25}
             </span>
-            <span className="text-xs text-slate-500">µg/m³</span>
+            <span className="text-xs text-slate-600 dark:text-slate-400 font-semibold">µg/m³</span>
           </div>
-          <span className="text-[11px] text-slate-500 mt-1 block">
+          <span className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 block">
             Verified rolling diurnal reference level
           </span>
         </div>
@@ -201,30 +202,30 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setSelectedMetric('both')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 selectedMetric === 'both'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               PM2.5 vs PM10
             </button>
             <button
               onClick={() => setSelectedMetric('pm25')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 selectedMetric === 'pm25'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               PM2.5 Only
             </button>
             <button
               onClick={() => setSelectedMetric('aqi')}
-              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer ${
                 selectedMetric === 'aqi'
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               US AQI
@@ -250,19 +251,20 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
                   <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" opacity={0.6} />
-              <XAxis dataKey="time" tick={{ fontSize: 10 }} stroke="#94A3B8" />
-              <YAxis tick={{ fontSize: 10 }} stroke="#94A3B8" />
+              <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? '#334155' : '#E2E8F0'} opacity={0.6} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
+              <YAxis tick={{ fontSize: 10, fill: darkMode ? '#94A3B8' : '#475569' }} stroke={darkMode ? '#475569' : '#CBD5E1'} />
               <Tooltip 
                 contentStyle={{ 
-                  backgroundColor: '#0F172A', 
-                  border: '1px solid #1E293B', 
+                  backgroundColor: darkMode ? '#0F172A' : '#FFFFFF', 
+                  border: darkMode ? '1px solid #334155' : '1px solid #CBD5E1', 
                   borderRadius: '8px', 
                   fontSize: '11px',
-                  color: '#F8FAFC' 
-                }} 
+                  color: darkMode ? '#F8FAFC' : '#0F172A' 
+                }}
+                itemStyle={{ color: darkMode ? '#F8FAFC' : '#0F172A' }}
               />
-              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px', color: darkMode ? '#CBD5E1' : '#334155' }} />
 
               {(selectedMetric === 'both' || selectedMetric === 'pm25') && (
                 <Area 
@@ -314,7 +316,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
         </div>
 
         {anomalies.length === 0 ? (
-          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-850 text-xs text-slate-500 text-center">
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-300 text-center border border-slate-200 dark:border-slate-700">
             No extreme statistical pollution spikes detected in the recent recording cycle. Atmospheric conditions remained stable.
           </div>
         ) : (
@@ -322,7 +324,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
             {anomalies.map((a, idx) => (
               <div 
                 key={idx}
-                className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -337,17 +339,17 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ airData, onNavigateToTab
                       +{a.percentageSpike}% Spike ({a.severity})
                     </span>
                   </div>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-slate-700 dark:text-slate-300">
                     <span className="font-semibold text-slate-900 dark:text-white">{a.pollutant} surged to {a.value} µg/m³</span> (Rolling baseline: {a.baseline} µg/m³).
                   </p>
-                  <p className="text-[11px] text-slate-500 italic">
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 italic">
                     Diagnostic cause: {a.potentialCause}
                   </p>
                 </div>
 
                 <button
                   onClick={() => onNavigateToTab('simulator')}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0 cursor-pointer"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>Simulate Mitigation</span>

@@ -324,48 +324,48 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
           
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
               <Thermometer className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-400 text-[10px] uppercase font-semibold block">Ambient Temp</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-semibold block">Ambient Temp</span>
               <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
                 {current.temperature !== undefined ? `${current.temperature}°C` : '26.5°C'}
               </span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
               <Droplets className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-400 text-[10px] uppercase font-semibold block">Relative Humidity</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-semibold block">Relative Humidity</span>
               <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
                 {current.humidity !== undefined ? `${current.humidity}%` : '54%'}
               </span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
               <Wind className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-400 text-[10px] uppercase font-semibold block">Surface Wind Speed</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-semibold block">Surface Wind Speed</span>
               <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
                 {current.wind_speed !== undefined ? `${current.wind_speed} km/h` : '6.2 km/h'}
               </span>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300">
               <Compass className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-400 text-[10px] uppercase font-semibold block">Wind Bearing / Condition</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-semibold block">Wind Bearing / Condition</span>
               <span className="text-base font-bold text-slate-900 dark:text-white truncate block">
                 {current.weather_condition || 'Atmospheric Haze'}
               </span>
